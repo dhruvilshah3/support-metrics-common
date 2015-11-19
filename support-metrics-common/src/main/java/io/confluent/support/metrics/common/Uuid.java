@@ -18,7 +18,7 @@ package io.confluent.support.metrics.common;
 import java.util.UUID;
 
 public class Uuid {
-  private static final java.util.UUID uuid = java.util.UUID.randomUUID();
+  private static final java.util.UUID uuid = UUID.randomUUID();
 
 
   public static String getUUID() {
