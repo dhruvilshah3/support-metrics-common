@@ -15,27 +15,13 @@
  */
 package io.confluent.support.metrics.common;
 
-import org.apache.avro.generic.GenericContainer;
+import java.util.UUID;
 
-public interface Collector {
+public class Uuid {
+  private static final java.util.UUID uuid = java.util.UUID.randomUUID();
 
-  public enum CollectorState {Running, ShuttingDown};
 
-  /**
-   * Collects metrics from a Kafka broker.
-   * @return An Avro record that contains the collected metrics.
-   */
-  GenericContainer collectMetrics();
-
-  /**
-   * Gets the state associated with a Collector
-   * @return Collector State
-   */
-  public CollectorState getState();
-
-  /**
-   * Sets the state associated with a Collector
-   */
-  public void setState(CollectorState collectorState);
-
+  public static String getUUID() {
+    return uuid.toString();
+  }
 }
