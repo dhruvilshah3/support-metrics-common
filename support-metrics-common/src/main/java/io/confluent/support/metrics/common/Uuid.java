@@ -23,6 +23,11 @@ public class Uuid {
   private final UUID uuid = UUID.randomUUID();
 
   public String getUUID() {
+    return toString();
+  }
+
+  @Override
+  public String toString() {
     return uuid.toString();
   }
 
