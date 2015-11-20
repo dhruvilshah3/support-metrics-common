@@ -19,7 +19,7 @@ import org.apache.avro.generic.GenericContainer;
 
 public interface Collector {
 
-  public enum CollectorState {Running, ShuttingDown};
+  enum CollectorState {Running, ShuttingDown};
 
   /**
    * Collects metrics from a Kafka broker.
@@ -31,11 +31,11 @@ public interface Collector {
    * Gets the state associated with a Collector
    * @return Collector State
    */
-  public CollectorState getState();
+  CollectorState getState();
 
   /**
    * Sets the state associated with a Collector
    */
-  public void setState(CollectorState collectorState);
+  void setState(CollectorState collectorState);
 
 }
