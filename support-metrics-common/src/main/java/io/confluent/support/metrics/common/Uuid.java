@@ -18,10 +18,11 @@ package io.confluent.support.metrics.common;
 import java.util.UUID;
 
 public class Uuid {
-  private static final java.util.UUID uuid = UUID.randomUUID();
 
+  private final java.util.UUID uuid = UUID.randomUUID();
 
-  public static String getUUID() {
+  public String getUUID() {
     return uuid.toString();
   }
+
 }
