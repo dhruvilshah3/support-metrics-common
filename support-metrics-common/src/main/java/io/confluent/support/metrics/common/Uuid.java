@@ -19,7 +19,10 @@ import java.util.UUID;
 
 public class Uuid {
 
-  private final java.util.UUID uuid = UUID.randomUUID();
+  /**
+   * For the purposes of metrics collection we want to use type-4 UUIDs.
+   */
+  private final UUID uuid = UUID.randomUUID();
 
   public String getUUID() {
     return uuid.toString();
