@@ -15,40 +15,11 @@ package io.confluent.support.metrics.common;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Filter {
-
-  private Map<String, Boolean> filterMap;
+public interface Filter {
 
   /**
-   * Constructor with a filter map.
-   * @param filterMap A Key-Value mapping. If key exists, there is a match. Value is ignored
-   */
-  public Filter(Map<String, Boolean> filterMap) {
-    this.filterMap = filterMap;
-  }
-
-  /**
-   * Apply the filter to an input
+   * Apply the filter to an input potentially removing elements from it
    * @param input: Input data
-   * @return Input data minus any element that is filtered out
    */
-  public Map apply(Map input) {
-    if (input == null) {
-      return null;
-    }
-
-    Map retMap = new HashMap();
-    retMap.putAll(input);
-
-    if (filterMap == null) return retMap;
-
-
-    for (Object key: filterMap.keySet()) {
-      if (retMap.containsKey(key)) {
-        retMap.remove(key);
-      }
-    }
-
-    return retMap;
-  }
+  public void apply(Map input);
 }
