@@ -18,10 +18,12 @@ import java.util.Map;
 public interface Filter<K> {
 
   /**
-   * Apply the filter to an input potentially removing elements from it
+   * Apply the filter, thereby removing elements from it where appropriate.  Modifies the input
+   * argument in-place.
    *
-   * @param input: Input data
+   * @param m The input map, which is modified in-place by the filter.  If this is not what you
+   *          want, then create a copy of the data structure prior to applying the filter.
    */
-  <V> void apply(Map<K, V> input);
+  <V> void apply(Map<K, V> m);
 
 }
