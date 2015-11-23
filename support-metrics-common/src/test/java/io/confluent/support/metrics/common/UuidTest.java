@@ -27,4 +27,17 @@ public class UuidTest {
     assertThat(uuid.toString()).isEqualTo(uuid.getUUID());
   }
 
+  @Test
+  public void uuidDoesNotChangeBetweenRuns() {
+    // Given
+    Uuid uuid = new Uuid();
+
+    // When
+    String firstUuid = uuid.getUUID();
+    String secondUuid = uuid.getUUID();
+
+    // Then
+    assertThat(firstUuid).isEqualTo(secondUuid);
+  }
+
 }
