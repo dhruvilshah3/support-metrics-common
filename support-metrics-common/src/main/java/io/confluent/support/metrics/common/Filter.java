@@ -15,13 +15,13 @@ package io.confluent.support.metrics.common;
 
 import java.util.Map;
 
-public interface Filter {
+public interface Filter<K> {
 
   /**
    * Apply the filter to an input potentially removing elements from it
    *
    * @param input: Input data
    */
-  void apply(Map input);
+  <V> void apply(Map<K, V> input);
 
 }
