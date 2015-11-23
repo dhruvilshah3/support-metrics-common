@@ -11,15 +11,34 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package io.confluent.support.metrics.common;
+package io.confluent.support.metrics.common.time;
 
 public class TimeUtils {
+
+  private static class SystemClock implements Clock {
+
+    @Override
+    public long currentTimeMs() {
+      return System.currentTimeMillis();
+    }
+
+  }
+
+  private final Clock clock;
+
+  public TimeUtils() {
+    this(new SystemClock());
+  }
+
+  public TimeUtils(Clock clock) {
+    this.clock = clock;
+  }
 
   /**
    * Returns the current time in seconds since the epoch (aka Unix time).
    */
   public long nowInUnixTime() {
-    return System.currentTimeMillis() / 1000;
+    return clock.currentTimeMs() / 1000;
   }
 
 }
