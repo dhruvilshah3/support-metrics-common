@@ -12,14 +12,16 @@
  * the License.
  */
 package io.confluent.support.metrics.common;
-import java.util.HashMap;
+
 import java.util.Map;
 
 public interface Filter {
 
   /**
    * Apply the filter to an input potentially removing elements from it
+   *
    * @param input: Input data
    */
-  public void apply(Map input);
+  void apply(Map input);
+
 }
