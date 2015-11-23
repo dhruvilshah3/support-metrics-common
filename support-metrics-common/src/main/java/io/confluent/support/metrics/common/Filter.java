@@ -13,17 +13,48 @@
  */
 package io.confluent.support.metrics.common;
 
-import java.util.Map;
+import java.util.HashSet;
+import java.util.Properties;
+import java.util.Set;
 
-public interface Filter<K> {
+public class Filter {
+
+  private final Set<String> keysToRemove;
 
   /**
-   * Apply the filter, thereby removing elements from it where appropriate.  Modifies the input
-   * argument in-place.
-   *
-   * @param m The input map, which is modified in-place by the filter.  If this is not what you
-   *          want, then create a copy of the data structure prior to applying the filter.
+   * The default filter does not filter anything.
    */
-  <V> void apply(Map<K, V> m);
+  public Filter() {
+    this(new HashSet<String>());
+  }
+
+  public Filter(Set<String> keysToRemove) {
+    this.keysToRemove = new HashSet<>(keysToRemove);
+  }
+
+  /**
+   * Returns a copy of the input with any to-be-filtered keys removed.
+   */
+  public Properties apply(Properties properties) {
+    if (properties == null) {
+      throw new IllegalArgumentException("properties must not be null");
+    } else {
+      if (properties.isEmpty()) {
+        return new Properties();
+      } else {
+        Properties filtered = new Properties();
+        for (Object key : properties.keySet()) {
+          if (!keysToRemove.contains(key)) {
+            filtered.put(key, properties.get(key));
+          }
+        }
+        return filtered;
+      }
+    }
+  }
+
+  public Set<String> getKeys() {
+    return new HashSet<>(keysToRemove);
+  }
 
 }
