@@ -26,31 +26,45 @@ import scala.sys.Prop;
  */
 public class KafkaServerUtils {
   private static final Logger log = LoggerFactory.getLogger(KafkaServerUtils.class);
-  private static EmbeddedZookeeper zookeeper = null;
-  private static Properties serverConfig = null;
+  private EmbeddedZookeeper zookeeper = null;
+  private static Properties defaultServerConfig = null;
+  private KafkaServer server = null;
+  private boolean serverStarted = false;
 
   static {
     try {
       Properties props = new Properties();
       props.load(Version.class.getResourceAsStream("/support-metrics-common-default-server.properties"));
-      serverConfig = props;
+      defaultServerConfig = props;
     } catch (IOException e) {
       log.warn("Error while loading default properties:", e.getMessage());
     }
   }
 
-  private static void startZookeeper() {
+  private void startZookeeper() {
     zookeeper = new EmbeddedZookeeper();
   }
 
-  private static void stopZookeeper(EmbeddedZookeeper zookeeper) {
+  private void stopZookeeper() {
     if (zookeeper == null) {
       return;
     }
     zookeeper.shutdown();
   }
 
-  public static KafkaServer startServer() {
+  public String getZookeeperConnection() {
+    if (zookeeper != null) {
+      return "localhost:" + zookeeper.port();
+    } else {
+      return null;
+    }
+  }
+
+  public KafkaServer startServer() {
+    if (serverStarted) {
+      log.error("Server already started");
+      return null;
+    }
 
     if (zookeeper == null) {
       startZookeeper();
@@ -59,31 +73,28 @@ public class KafkaServerUtils {
     Option<SecurityProtocol> so = Option.apply(SecurityProtocol.PLAINTEXT);
     Properties props = TestUtils.createBrokerConfig(brokerId, "localhost:" + zookeeper.port(), true, false, 0,
         so, Option$.MODULE$.<File>empty(), true, false, 0, false, 0, false, 0);
-    KafkaServer server = TestUtils.createServer(KafkaConfig.fromProps(props), SystemTime$.MODULE$);
+    server = TestUtils.createServer(KafkaConfig.fromProps(props), SystemTime$.MODULE$);
 
-    // change the server config with zookeeper string
-    serverConfig.remove(KafkaConfig$.MODULE$.ZkConnectProp());
-    serverConfig.setProperty(KafkaConfig$.MODULE$.ZkConnectProp(), "localhost:" + zookeeper.port());
     return server;
   }
 
-  public static void stopServer(KafkaServer server) {
+  public void stopServer() {
     if (server == null) {
       return;
     }
     server.shutdown();
     CoreUtils.rm(server.config().logDirs());
+    server = null;
     if (zookeeper != null) {
-      zookeeper.shutdown();
+      stopZookeeper();
     }
   }
 
   /**
-   * Returns a default broker configuration if broker has not started. If broker
-   * has started returns the current broker configuration (with updated zookeeper string)
+   * Returns a newly allocated default broker configuration if broker has not started.
    * @return
    */
-  public static Properties getDefaultBrokerConfiguration() {
-    return serverConfig;
+  public Properties getDefaultBrokerConfiguration() {
+    return (Properties)defaultServerConfig.clone();
   }
 }
