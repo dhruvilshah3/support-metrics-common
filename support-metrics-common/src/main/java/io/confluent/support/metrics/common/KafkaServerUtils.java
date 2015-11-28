@@ -50,6 +50,7 @@ public class KafkaServerUtils {
       return;
     }
     zookeeper.shutdown();
+    zookeeper = null;
   }
 
   public String getZookeeperConnection() {
