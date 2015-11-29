@@ -25,11 +25,18 @@ import scala.sys.Prop;
  * This class is NOT thread safe
  */
 public class KafkaServerUtils {
+  public static final int MAX_SERVERS = 10;
   private static final Logger log = LoggerFactory.getLogger(KafkaServerUtils.class);
   private EmbeddedZookeeper zookeeper = null;
   private static Properties defaultServerConfig = null;
-  private KafkaServer server = null;
-  private boolean serverStarted = false;
+  private KafkaServer[] servers = new KafkaServer[MAX_SERVERS];
+  private boolean[] serversStarted = new boolean[MAX_SERVERS];
+
+  public KafkaServerUtils() {
+    for (int i = 0; i < MAX_SERVERS; i++) {
+      serversStarted[i] = false;
+    }
+  }
 
   static {
     try {
@@ -61,8 +68,13 @@ public class KafkaServerUtils {
     }
   }
 
-  public KafkaServer startServer() {
-    if (serverStarted) {
+  /**
+   * Starts a specific server with an ID from 0 to MAX_SERVERS-1
+   * @param serverId
+   * @return
+   */
+  public KafkaServer startServer(int serverId) {
+    if (serversStarted[serverId]) {
       log.error("Server already started");
       return null;
     }
@@ -70,25 +82,49 @@ public class KafkaServerUtils {
     if (zookeeper == null) {
       startZookeeper();
     }
-    int brokerId = 0;
     Option<SecurityProtocol> so = Option.apply(SecurityProtocol.PLAINTEXT);
-    Properties props = TestUtils.createBrokerConfig(brokerId, "localhost:" + zookeeper.port(), true, false, 0,
+    Properties props = TestUtils.createBrokerConfig(serverId, "localhost:" + zookeeper.port(), true, false, 0,
         so, Option$.MODULE$.<File>empty(), true, false, 0, false, 0, false, 0);
-    server = TestUtils.createServer(KafkaConfig.fromProps(props), SystemTime$.MODULE$);
-
-    return server;
+    servers[serverId] = TestUtils.createServer(KafkaConfig.fromProps(props), SystemTime$.MODULE$);
+    serversStarted[serverId] = true;
+    return servers[serverId];
   }
 
-  public void stopServer() {
-    if (server == null) {
+  /**
+   * Starts the default server (0)
+   * @return
+   */
+  public KafkaServer startServer() {
+    return startServer(0);
+  }
+
+  public void stopServer(int serverId) {
+    boolean stopZookeeper = true;
+    if (servers[serverId] == null) {
       return;
     }
-    server.shutdown();
-    CoreUtils.rm(server.config().logDirs());
-    server = null;
-    if (zookeeper != null) {
+    servers[serverId].shutdown();
+    CoreUtils.rm(servers[serverId].config().logDirs());
+    servers[serverId] = null;
+    serversStarted[serverId] = false;
+
+    // check if all servers have stopped
+    for (int i = 0; i < MAX_SERVERS; i++) {
+      if (serversStarted[i] == true) {
+        stopZookeeper = false;
+        break;
+      }
+    }
+    if (zookeeper != null && stopZookeeper == true) {
       stopZookeeper();
     }
+  }
+
+  /**
+   * Stops the default server (0)
+   */
+  public void stopServer() {
+    stopServer(0);
   }
 
   /**
