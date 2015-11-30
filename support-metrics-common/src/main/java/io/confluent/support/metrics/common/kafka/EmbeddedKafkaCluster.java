@@ -57,12 +57,6 @@ public class EmbeddedKafkaCluster {
   private EmbeddedZookeeper zookeeper = null;
   private final Map<Integer, KafkaServer> brokersById = new ConcurrentHashMap<>();
 
-  private void startZookeeperIfNeeded() {
-    if (zookeeper == null) {
-      zookeeper = new EmbeddedZookeeper();
-    }
-  }
-
   /**
    * Starts N=numBrokers Kafka brokers backed by a single-node ZK ensemble.
    *
@@ -81,6 +75,12 @@ public class EmbeddedKafkaCluster {
     for (int brokerId = 0; brokerId < numBrokers; brokerId++) {
       log.debug("Starting broker with id {} ...", brokerId);
       startBroker(brokerId);
+    }
+  }
+
+  private void startZookeeperIfNeeded() {
+    if (zookeeper == null) {
+      zookeeper = new EmbeddedZookeeper();
     }
   }
 
