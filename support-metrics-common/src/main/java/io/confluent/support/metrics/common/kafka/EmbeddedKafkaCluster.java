@@ -149,11 +149,10 @@ public class EmbeddedKafkaCluster {
   }
 
   private void stopZookeeper() {
-    if (zookeeper == null) {
-      return;
+    if (zookeeper != null) {
+      zookeeper.shutdown();
+      zookeeper = null;
     }
-    zookeeper.shutdown();
-    zookeeper = null;
   }
 
   /**
