@@ -204,6 +204,8 @@ public class KafkaUtilitiesTest {
       assertThat(kUtil.verifySupportTopic(broker.zkUtils(), topic, partitions, replication)).isEqualTo(KafkaUtilities.VerifyTopicState.Less);
     }
     assertThat(kUtil.getNumTopics(broker.zkUtils())).isEqualTo(exampleTopics.length);
+
+    // Cleanup
     cluster.stopCluster();
   }
 
