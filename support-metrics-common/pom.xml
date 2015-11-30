@@ -20,22 +20,6 @@
 
   <dependencies>
     <dependency>
-	<groupId>org.slf4j</groupId>
-	<artifactId>slf4j-api</artifactId>
-	<version>1.7.6</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.kafka</groupId>
-      <artifactId>kafka_${kafka.scala.version}</artifactId>
-      <version>${kafka.version}</version>
-      <classifier>test</classifier>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.kafka</groupId>
-      <artifactId>kafka_${kafka.scala.version}</artifactId>
-      <version>${kafka.version}</version>
-    </dependency>
-    <dependency>
       <groupId>org.apache.avro</groupId>
       <artifactId>avro</artifactId>
       <version>${avro.version}</version>
