@@ -156,6 +156,10 @@ public class EmbeddedKafkaCluster {
     zookeeper = null;
   }
 
+  /**
+   * @return The zookeeper.connect setting of the cluster if it is running.
+   * @throws IllegalStateException if you call this method when the cluster is not running.
+   */
   public String zookeeperConnectString() {
     if (zookeeper != null) {
       return "localhost:" + zookeeper.port();
