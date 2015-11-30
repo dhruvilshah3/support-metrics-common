@@ -20,7 +20,9 @@ import scala.Option;
 import scala.Option$;
 
 /**
- * Helper class for starting an embedded zookeeper and broker. This class is NOT thread safe.
+ * Starts an embedded Kafka cluster including a backing ZooKeeper ensemble.
+ *
+ * This class should be used for unit/integration testing only.
  */
 public class EmbeddedKafkaCluster {
 
