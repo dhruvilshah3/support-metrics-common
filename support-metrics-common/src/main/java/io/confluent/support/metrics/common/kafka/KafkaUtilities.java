@@ -59,6 +59,10 @@ public class KafkaUtilities {
       this.stateId = stateId;
     }
 
+    public int getStateId() {
+      return stateId;
+    }
+
   }
 
   /**
@@ -81,39 +85,39 @@ public class KafkaUtilities {
   /**
    * Gets a list of servers that are up in the cluster
    *
-   * @param numServers Maximum number of bootstrap servers needed. Note that what is returned could
-   *                   be less.
-   * @return Number of bootstrap servers or null if none Note that only servers with PLAINTEXT ports
-   * are enabled
+   * @param maxNumServers Maximum number of bootstrap servers that should be returned.  Note that
+   *                      less servers may be returned than the maximum.
+   * @return A list of bootstrap servers, or an empty list if there are none or if there were
+   * errors.  Note that only servers with PLAINTEXT ports will be returned.
    */
-  public String[] getBootstrapServer(ZkUtils zkUtils, int numServers) {
-    Seq<Broker> brokerList = zkUtils.getAllBrokersInCluster();
-    if (zkUtils == null || brokerList == null || brokerList.size() == 0 || numServers <= 0) {
-      log.error("Could not get bootstrap servers. Invalid arguments.");
-      return null;
+  public List<String> getBootstrapServers(ZkUtils zkUtils, int maxNumServers) {
+    if (zkUtils == null) {
+      throw new IllegalArgumentException("zkUtils must not be null");
     }
-    int actualServers = Math.min(numServers, brokerList.size());
-    List<String> bootstrapServers = new ArrayList<>();
-    Iterator<Broker> it = brokerList.iterator();
-    int i = 0;
-    while (it.hasNext() && i < actualServers) {
-      Broker broker = it.next();
-      // Note that we only support PLAINTEXT ports for this version
-      BrokerEndPoint brokerEndPoint = null;
-      try {
-        brokerEndPoint = broker.getBrokerEndPoint(SecurityProtocol.PLAINTEXT);
-      } catch (BrokerEndPointNotAvailableException e) {
-        // try next one
-        continue;
-      }
-      bootstrapServers.add(brokerEndPoint.connectionString());
-      i++;
+    if (maxNumServers < 1) {
+      throw new IllegalArgumentException("maximum number of requested servers must be >= 1");
     }
 
-    if (bootstrapServers.size() == 0) {
-      return null;
+    Seq<Broker> brokerList = zkUtils.getAllBrokersInCluster();
+    if (brokerList == null || brokerList.size() == 0) {
+      return new ArrayList<>();
     } else {
-      return bootstrapServers.toArray(new String[bootstrapServers.size()]);
+      int actualServers = Math.min(maxNumServers, brokerList.size());
+      List<String> bootstrapServers = new ArrayList<>();
+      Iterator<Broker> it = brokerList.iterator();
+      int i = 0;
+      while (it.hasNext() && i < actualServers) {
+        Broker broker = it.next();
+        try {
+          // Note that we only support PLAINTEXT ports for this version
+          BrokerEndPoint brokerEndPoint = broker.getBrokerEndPoint(SecurityProtocol.PLAINTEXT);
+          bootstrapServers.add(brokerEndPoint.connectionString());
+          i++;
+        } catch (BrokerEndPointNotAvailableException e) {
+          // try next one
+        }
+      }
+      return bootstrapServers;
     }
   }
 

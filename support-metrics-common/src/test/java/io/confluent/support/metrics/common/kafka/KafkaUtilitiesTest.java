@@ -2,24 +2,71 @@ package io.confluent.support.metrics.common.kafka;
 
 import org.junit.Test;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
+import kafka.cluster.Broker;
 import kafka.server.KafkaServer;
 import kafka.utils.ZkUtils;
+import scala.collection.JavaConversions;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class KafkaUtilitiesTest {
 
   private static final ZkUtils mockZkUtils = mock(ZkUtils.class);
+  private static final int anyMaxNumServers = 2;
   private static final String anyTopic = "valueNotRelevant";
   private static final int anyPartitions = 1;
   private static final int anyReplication = 1;
   private static final long anyRetentionMs = 1000L;
   private static final long oneYearRetention = 365 * 24 * 60 * 60 * 1000L;
   private static final String[] exampleTopics = {"__confluent.support.metrics", "anyTopic", "basketball"};
+
+  @Test
+  public void getBootstrapServersThrowsIAEWhenZkUtilsIsNull() {
+    // Given
+    KafkaUtilities kUtil = new KafkaUtilities();
+
+    // When/Then
+    try {
+      kUtil.getBootstrapServers(null, anyMaxNumServers);
+      fail("IllegalArgumentException expected because zkUtils is null");
+    } catch (IllegalArgumentException e) {
+      // ignore
+    }
+  }
+
+  @Test
+  public void getBootstrapServersThrowsIAEWhenMaxNumServersIsZero() {
+    // Given
+    KafkaUtilities kUtil = new KafkaUtilities();
+    int zeroMaxNumServers = 0;
+
+    // When/Then
+    try {
+      kUtil.getBootstrapServers(mockZkUtils, zeroMaxNumServers);
+      fail("IllegalArgumentException expected because max number of servers is zero");
+    } catch (IllegalArgumentException e) {
+      // ignore
+    }
+  }
+
+  @Test
+  public void getBootstrapServersReturnsEmptyListWhenThereAreNoLiveBrokers() {
+    // Given
+    KafkaUtilities kUtil = new KafkaUtilities();
+    ZkUtils zkUtils = mock(ZkUtils.class);
+    List<Broker> empty = new ArrayList<>();
+    when(zkUtils.getAllBrokersInCluster()).thenReturn(JavaConversions.asScalaBuffer(empty).toList());
+
+    // When/Then
+    assertThat(kUtil.getBootstrapServers(zkUtils, anyMaxNumServers)).isEmpty();
+  }
 
   @Test
   public void createTopicThrowsIAEWhenZkUtilsIsNull() {
@@ -247,7 +294,6 @@ public class KafkaUtilitiesTest {
     // When/Then
     assertThat(kUtil.createTopicIfMissing(defunctZkUtils, anyTopic, anyPartitions, anyReplication, anyRetentionMs)).isFalse();
   }
-
 
   @Test
   public void replicatedTopicsCanBeCreatedAndVerified() {
