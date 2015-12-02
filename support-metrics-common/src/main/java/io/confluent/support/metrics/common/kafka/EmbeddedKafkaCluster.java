@@ -44,7 +44,7 @@ public class EmbeddedKafkaCluster {
   private static final Option<SecurityProtocol> INTER_BROKER_SECURITY_PROTOCOL = Option.apply(SecurityProtocol.PLAINTEXT);
   private static final boolean ENABLE_CONTROLLED_SHUTDOWN = false;
   private static final boolean ENABLE_DELETE_TOPIC = false;
-  private static final int BROKER_PORT = 0;
+  private static final int BROKER_PORT = 0; // 0 results in a random port being selected
   private static final Option<File> TRUST_STORE_FILE = Option$.MODULE$.<File>empty();
   private static final boolean ENABLE_PLAINTEXT = true;
   private static final boolean ENABLE_SASL_PLAINTEXT = false;
