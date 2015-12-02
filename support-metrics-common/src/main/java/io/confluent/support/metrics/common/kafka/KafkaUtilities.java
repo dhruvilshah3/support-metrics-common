@@ -66,19 +66,22 @@ public class KafkaUtilities {
   }
 
   /**
-   * Get the total number of topics from zookeeper
+   * Get the total number of topics in the cluster by querying ZooKeeper.
+   *
+   * @return The total number of topics in the cluster, or -1 if there was an error.
+   * @throws IllegalArgumentException if zkUtils is null
    */
   public long getNumTopics(ZkUtils zkUtils) {
     if (zkUtils == null) {
-      log.error("Could not get number of topics. Invalid arguments.");
-      return 0;
+      throw new IllegalArgumentException("zkUtils must not be null");
     }
+
     try {
       Seq<String> topics = zkUtils.getAllTopics();
       return topics.length();
     } catch (Exception e) {
-      log.error("Could not get number of from zookeeper: ", e.getMessage());
-      return 0;
+      log.error("Could not retrieve number of topics from ZooKeeper: {}", e.getMessage());
+      return -1L;
     }
   }
 

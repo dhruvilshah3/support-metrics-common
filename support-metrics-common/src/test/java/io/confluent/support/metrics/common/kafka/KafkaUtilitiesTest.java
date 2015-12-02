@@ -28,6 +28,57 @@ public class KafkaUtilitiesTest {
   private static final String[] exampleTopics = {"__confluent.support.metrics", "anyTopic", "basketball"};
 
   @Test
+  public void getNumTopicsThrowsIAEWhenZkUtilsIsNull() {
+    // Given
+    KafkaUtilities kUtil = new KafkaUtilities();
+
+    // When/Then
+    try {
+      kUtil.getNumTopics(null);
+      fail("IllegalArgumentException expected because zkUtils is null");
+    } catch (IllegalArgumentException e) {
+      // ignore
+    }
+  }
+
+  @Test
+  public void getNumTopicsReturnsMinusOneOnError() {
+    // Given
+    KafkaUtilities kUtil = new KafkaUtilities();
+    ZkUtils zkUtils = mock(ZkUtils.class);
+    when(zkUtils.getAllTopics()).thenThrow(new RuntimeException("exception intentionally thrown by test"));
+
+    // When/Then
+    assertThat(kUtil.getNumTopics(zkUtils)).isEqualTo(-1L);
+  }
+
+  @Test
+  public void getNumTopicsReturnsZeroWhenThereAreNoTopics() {
+    // Given
+    KafkaUtilities kUtil = new KafkaUtilities();
+    ZkUtils zkUtils = mock(ZkUtils.class);
+    List<String> zeroTopics = new ArrayList<>();
+    when(zkUtils.getAllTopics()).thenReturn(JavaConversions.asScalaBuffer(zeroTopics).toList());
+
+    // When/Then
+    assertThat(kUtil.getNumTopics(zkUtils)).isEqualTo(0L);
+  }
+
+  @Test
+  public void getNumTopicsReturnsCorrectNumber() {
+    // Given
+    KafkaUtilities kUtil = new KafkaUtilities();
+    ZkUtils zkUtils = mock(ZkUtils.class);
+    List<String> topics = new ArrayList<>();
+    topics.add("topic1");
+    topics.add("topic2");
+    when(zkUtils.getAllTopics()).thenReturn(JavaConversions.asScalaBuffer(topics).toList());
+
+    // When/Then
+    assertThat(kUtil.getNumTopics(zkUtils)).isEqualTo(topics.size());
+  }
+
+  @Test
   public void getBootstrapServersThrowsIAEWhenZkUtilsIsNull() {
     // Given
     KafkaUtilities kUtil = new KafkaUtilities();
