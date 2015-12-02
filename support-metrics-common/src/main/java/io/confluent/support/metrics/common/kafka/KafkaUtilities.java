@@ -125,14 +125,16 @@ public class KafkaUtilities {
   }
 
   /**
-   * Creates a topic in Kafka, if it is not already there
+   * Creates a topic in Kafka, if it is not already there, and verifies that it is properly created
    *
    * @param partitions  Desired number of partitions
    * @param replication Desired number of replicas
    * @param retentionMs Desired retention time in milliseconds
-   * @return True if topic was created, false otherwise
+   * @return True if topic was created and verified successfully. False if topic could not be
+   * created, or it is created but verification reveals that the number of replicas or partitions
+   * have dropped to unacceptable levels.
    */
-  public boolean createTopicIfMissing(ZkUtils zkUtils,
+  public boolean createAndVerifyTopic(ZkUtils zkUtils,
                                       String topic,
                                       int partitions,
                                       int replication,
