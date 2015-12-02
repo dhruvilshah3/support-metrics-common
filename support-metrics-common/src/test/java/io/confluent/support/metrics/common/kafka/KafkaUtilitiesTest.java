@@ -16,6 +16,10 @@ import static org.assertj.core.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+/**
+ * The tests in this class should not be run in parallel.  This limitation is caused by how the
+ * current implementation of EmbeddedKafkaCLuster works.
+ */
 public class KafkaUtilitiesTest {
 
   private static final ZkUtils mockZkUtils = mock(ZkUtils.class);
