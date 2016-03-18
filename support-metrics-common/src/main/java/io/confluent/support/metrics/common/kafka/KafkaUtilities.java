@@ -22,9 +22,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
-
 import kafka.admin.AdminOperationException;
 import kafka.admin.AdminUtils;
+import kafka.admin.RackAwareMode.Disabled$;
 import kafka.cluster.Broker;
 import kafka.cluster.BrokerEndPoint;
 import kafka.common.BrokerEndPointNotAvailableException;
@@ -176,7 +176,7 @@ public class KafkaUtilities {
       metricsTopicProps.put(LogConfig.RetentionMsProp(), String.valueOf(retentionMs));
       log.info("Attempting to create topic {} with {} replicas, assuming {} total brokers",
           topic, actualReplication, brokerList.size());
-      AdminUtils.createTopic(zkUtils, topic, partitions, actualReplication, metricsTopicProps);
+      AdminUtils.createTopic(zkUtils, topic, partitions, actualReplication, metricsTopicProps, Disabled$.MODULE$);
     } catch (TopicExistsException te) {
       log.info("Topic {} already exists", topic);
       topicCreated = false;

@@ -29,6 +29,7 @@ import kafka.utils.CoreUtils;
 import kafka.utils.SystemTime$;
 import kafka.utils.TestUtils;
 import kafka.zk.EmbeddedZookeeper;
+import scala.None;
 import scala.Option;
 import scala.Option$;
 
@@ -101,7 +102,8 @@ public class EmbeddedKafkaCluster {
           ENABLE_SSL,
           SSL_PORT,
           ENABLE_SASL_SSL,
-          SASL_SSL_PORT);
+          SASL_SSL_PORT,
+          Option.<String>empty());
       KafkaServer broker = TestUtils.createServer(KafkaConfig.fromProps(props), SystemTime$.MODULE$);
       brokersById.put(brokerId, broker);
     } else {
