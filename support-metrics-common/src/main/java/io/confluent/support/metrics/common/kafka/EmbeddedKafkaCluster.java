@@ -145,7 +145,7 @@ public class EmbeddedKafkaCluster {
       KafkaServer broker = brokersById.get(brokerId);
       broker.shutdown();
       broker.awaitShutdown();
-      CoreUtils.rm(broker.config().logDirs());
+      CoreUtils.delete(broker.config().logDirs());
       brokersById.remove(brokerId);
     }
   }
