@@ -15,7 +15,7 @@ package io.confluent.support.metrics.common;
 
 
 public enum CollectorType {
-    BASIC(0, "basic"), FULL(1, "gull");
+    BASIC(0, "basic"), FULL(1, "full");
     public final int id;
     public final String name;
 
