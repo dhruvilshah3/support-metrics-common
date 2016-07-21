@@ -13,6 +13,7 @@
  */
 package io.confluent.support.metrics.common.kafka;
 
+import org.apache.kafka.common.errors.TopicExistsException;
 import org.apache.kafka.common.protocol.SecurityProtocol;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,13 +29,11 @@ import kafka.admin.RackAwareMode.Disabled$;
 import kafka.cluster.Broker;
 import kafka.cluster.BrokerEndPoint;
 import kafka.common.BrokerEndPointNotAvailableException;
-import kafka.common.TopicExistsException;
 import kafka.log.LogConfig;
 import kafka.server.BrokerShuttingDown;
 import kafka.server.KafkaServer;
 import kafka.server.PendingControlledShutdown;
 import kafka.server.RunningAsBroker;
-import kafka.server.RunningAsController;
 import kafka.utils.ZkUtils;
 import scala.collection.Iterator;
 import scala.collection.JavaConversions;
@@ -265,8 +264,7 @@ public class KafkaUtilities {
   }
 
   public boolean isReadyForMetricsCollection(KafkaServer server) {
-    return server.brokerState().currentState() == RunningAsBroker.state() ||
-        server.brokerState().currentState() == RunningAsController.state();
+    return server.brokerState().currentState() == RunningAsBroker.state();
   }
 
   public boolean isShuttingDown(KafkaServer server) {
