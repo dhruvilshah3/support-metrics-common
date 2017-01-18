@@ -13,8 +13,8 @@
  */
 package io.confluent.support.metrics.common.kafka;
 
+import kafka.client.ClientUtils$;
 import org.apache.kafka.common.errors.TopicExistsException;
-import org.apache.kafka.common.protocol.SecurityProtocol;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -100,19 +100,18 @@ public class KafkaUtilities {
       throw new IllegalArgumentException("maximum number of requested servers must be >= 1");
     }
 
-    Seq<Broker> brokerList = zkUtils.getAllBrokersInCluster();
-    if (brokerList == null || brokerList.size() == 0) {
+    // Note that we only support PLAINTEXT ports for this version
+    Seq<BrokerEndPoint> brokerList = ClientUtils$.MODULE$.getPlaintextBrokerEndPoints(zkUtils);
+    if (brokerList == null || brokerList.isEmpty()) {
       return new ArrayList<>();
     } else {
       int actualServers = Math.min(maxNumServers, brokerList.size());
       List<String> bootstrapServers = new ArrayList<>();
-      Iterator<Broker> it = brokerList.iterator();
+      Iterator<BrokerEndPoint> it = brokerList.iterator();
       int i = 0;
       while (it.hasNext() && i < actualServers) {
-        Broker broker = it.next();
+        BrokerEndPoint brokerEndPoint = it.next();
         try {
-          // Note that we only support PLAINTEXT ports for this version
-          BrokerEndPoint brokerEndPoint = broker.getBrokerEndPoint(SecurityProtocol.PLAINTEXT);
           bootstrapServers.add(brokerEndPoint.connectionString());
           i++;
         } catch (BrokerEndPointNotAvailableException e) {
