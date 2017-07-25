@@ -54,6 +54,7 @@ public class EmbeddedKafkaCluster {
   private static final int SSL_PORT = 0;
   private static final boolean ENABLE_SASL_SSL = false;
   private static final int SASL_SSL_PORT = 0;
+  private static final int LOG_DIR_COUNT = 1;
 
   private EmbeddedZookeeper zookeeper = null;
   private final Map<Integer, KafkaServer> brokersById = new ConcurrentHashMap<>();
@@ -105,7 +106,8 @@ public class EmbeddedKafkaCluster {
           SSL_PORT,
           ENABLE_SASL_SSL,
           SASL_SSL_PORT,
-          Option.<String>empty());
+          Option.<String>empty(),
+          LOG_DIR_COUNT);
       KafkaServer broker = TestUtils.createServer(KafkaConfig.fromProps(props), Time.SYSTEM);
       brokersById.put(brokerId, broker);
     } else {
