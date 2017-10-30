@@ -17,7 +17,7 @@ package io.confluent.support.metrics.submitters;
 import org.junit.Test;
 
 
-import io.confluent.support.metrics.SupportConfig;
+import io.confluent.support.metrics.BaseSupportConfig;
 import io.confluent.support.metrics.utils.CustomerIdExamples;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -25,7 +25,7 @@ import static org.assertj.core.api.Assertions.fail;
 
 public class ConfluentSubmitterTest {
 
-  private String customerId = SupportConfig.CONFLUENT_SUPPORT_CUSTOMER_ID_DEFAULT;
+  private String customerId = BaseSupportConfig.CONFLUENT_SUPPORT_CUSTOMER_ID_DEFAULT;
 
 
   @Test

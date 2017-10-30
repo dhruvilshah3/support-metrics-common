@@ -18,7 +18,7 @@ import org.apache.commons.validator.routines.UrlValidator;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpStatus;
 import io.confluent.support.metrics.utils.WebClient;
-import io.confluent.support.metrics.SupportConfig;
+import io.confluent.support.metrics.BaseSupportConfig;
 
 import org.apache.http.client.methods.HttpPost;
 import org.slf4j.Logger;
@@ -68,7 +68,7 @@ public class ConfluentSubmitter implements Submitter {
         throw new IllegalArgumentException("invalid HTTPS endpoint");
       }
     }
-    if (!SupportConfig.isSyntacticallyCorrectCustomerId(customerId)) {
+    if (!BaseSupportConfig.isSyntacticallyCorrectCustomerId(customerId)) {
       throw new IllegalArgumentException("invalid customer ID");
     }
     this.endpointHTTP = endpointHTTP;

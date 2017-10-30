@@ -20,15 +20,17 @@ import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
-import io.confluent.support.metrics.common.kafka.KafkaUtilities;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
-import java.util.List;
-import kafka.server.KafkaServer;
+
+import io.confluent.support.metrics.common.kafka.KafkaUtilities;
+import io.confluent.support.metrics.common.kafka.ZkUtilsProvider;
+import kafka.utils.ZkUtils;
 
 
 public class KafkaSubmitter implements Submitter {
@@ -38,7 +40,8 @@ public class KafkaSubmitter implements Submitter {
   private static final Integer requiredNumAcks = 1;
   private static final int maxBlockMs = 10 * 1000;
   private final String topic;
-  private KafkaServer server;
+  private final ZkUtilsProvider zkUtilsProvider;
+  private ZkUtils zkUtils;
 
   /**
    * Ideal number of bootstrap servers for the kafka producer.
@@ -50,11 +53,11 @@ public class KafkaSubmitter implements Submitter {
   /**
    * @param topic            The Kafka topic to which data is being sent.
    */
-  public KafkaSubmitter(KafkaServer server, String topic) {
-    if (server == null) {
-      throw new IllegalArgumentException("must specify server");
+  public KafkaSubmitter(ZkUtilsProvider zkUtilsProvider, String topic) {
+    if (zkUtilsProvider == null) {
+      throw new IllegalArgumentException("must specify zkUtils provider");
     } else {
-      this.server = server;
+      this.zkUtilsProvider = zkUtilsProvider;
     }
 
     if (topic == null || topic.isEmpty()) {
@@ -106,7 +109,10 @@ public class KafkaSubmitter implements Submitter {
 
   private Producer<byte[], byte[]> createProducer() {
     Properties props = new Properties();
-    List<String> bootstrapServerList = new KafkaUtilities().getBootstrapServers(server.zkUtils(), BOOTSTRAP_SERVERS);
+    if (zkUtils == null) {
+      zkUtils = zkUtilsProvider.zkUtils();
+    }
+    List<String> bootstrapServerList = new KafkaUtilities().getBootstrapServers(zkUtils, BOOTSTRAP_SERVERS);
     String[] bootstrapServers = bootstrapServerList.toArray(new String[bootstrapServerList.size()]);
     props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, StringUtils.join(bootstrapServers, ","));
     props.put(ProducerConfig.ACKS_CONFIG, Integer.toString(requiredNumAcks));
