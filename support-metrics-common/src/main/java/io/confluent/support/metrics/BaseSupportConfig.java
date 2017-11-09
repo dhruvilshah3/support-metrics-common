@@ -31,8 +31,7 @@ import java.util.regex.Pattern;
  * patch file.  If you need to make any changes (e.g. renaming settings, adding/removing settings),
  * then make sure to also update the patch file accordingly.
  */
-public class BaseSupportConfig {
-  private static final String PROPRIETARY_PACKAGE_NAME = "io.confluent.support.metrics.collectors.FullCollector";
+public abstract class BaseSupportConfig {
   private static final Logger log = LoggerFactory.getLogger(BaseSupportConfig.class);
 
   /**
@@ -40,7 +39,7 @@ public class BaseSupportConfig {
    */
   public static final String CONFLUENT_SUPPORT_METRICS_ENABLE_CONFIG = "confluent.support.metrics.enable";
   private static final String CONFLUENT_SUPPORT_METRICS_ENABLE_DOC = "False to disable metric collection, true otherwise.";
-  public static final String CONFLUENT_SUPPORT_METRICS_ENABLE_DEFAULT = "false";
+  public static final String CONFLUENT_SUPPORT_METRICS_ENABLE_DEFAULT = "true";
 
   /**
    * <code>confluent.support.customer.id</code>
@@ -85,29 +84,15 @@ public class BaseSupportConfig {
   public static final String CONFLUENT_SUPPORT_PROXY_DOC = "HTTP forward proxy used to support metrics to Confluent";
   public static final String CONFLUENT_SUPPORT_PROXY_DEFAULT = "";
 
-  /**
-   * <code>confluent.support.component</code>
-   */
-  public static final String CONFLUENT_SUPPORT_COMPONENT_CONFIG = "confluent.support.component";
 
   /**
    * Confluent endpoints. These are internal properties that cannot be set from a config file
    * but that are added to the original config file at startup time
    */
   public static final String CONFLUENT_SUPPORT_METRICS_ENDPOINT_INSECURE_CONFIG = "confluent.support.metrics.endpoint.insecure";
-  public static final String CONFLUENT_SUPPORT_METRICS_ENDPOINT_INSECURE_DEFAULT =
-      "http://support-metrics.confluent.io/%s/anon";
-  public static final String CONFLUENT_SUPPORT_METRICS_ENDPOINT_INSECURE_CUSTOMER_DEFAULT =
-      "http://support-metrics.confluent.io/%s/submit";
-  public static final String CONFLUENT_SUPPORT_METRICS_ENDPOINT_INSECURE_TEST_DEFAULT =
-      "http://support-metrics.confluent.io/%s/test";
+
   public static final String CONFLUENT_SUPPORT_METRICS_ENDPOINT_SECURE_CONFIG = "confluent.support.metrics.endpoint.secure";
-  public static final String CONFLUENT_SUPPORT_METRICS_ENDPOINT_SECURE_DEFAULT =
-      "https://support-metrics.confluent.io/%s/anon";
-  public static final String CONFLUENT_SUPPORT_METRICS_ENDPOINT_SECURE_CUSTOMER_DEFAULT =
-      "https://support-metrics.confluent.io/%s/submit";
-  public static final String CONFLUENT_SUPPORT_METRICS_ENDPOINT_SECURE_TEST_DEFAULT =
-      "https://support-metrics.confluent.io/%s/test";
+
 
   private static final Pattern customerPattern = Pattern.compile("c\\d{1,30}");
 
@@ -117,7 +102,6 @@ public class BaseSupportConfig {
 
   private Properties properties;
 
-  private String component;
 
   /**
    * Returns the default Proactive Support properties
@@ -165,37 +149,36 @@ public class BaseSupportConfig {
     props.remove(BaseSupportConfig.CONFLUENT_SUPPORT_METRICS_ENDPOINT_INSECURE_CONFIG);
     props.remove(BaseSupportConfig.CONFLUENT_SUPPORT_METRICS_ENDPOINT_SECURE_CONFIG);
 
-    if(StringUtils.isBlank(props.getProperty(CONFLUENT_SUPPORT_COMPONENT_CONFIG))) {
-      throw new IllegalArgumentException("Support component is required");
-    }
-
-    this.component = props.getProperty(CONFLUENT_SUPPORT_COMPONENT_CONFIG);
     // set the correct customer id/endpoint pair
     if (isAnonymousUser(getCustomerId())) {
       if (isHttpEnabled()) {
-        setEndpointHTTP(CONFLUENT_SUPPORT_METRICS_ENDPOINT_INSECURE_DEFAULT);
+        setEndpointHTTP(getAnonymousEndpoint(false));
       }
       if (isHttpsEnabled()) {
-        setEndpointHTTPS(CONFLUENT_SUPPORT_METRICS_ENDPOINT_SECURE_DEFAULT);
+        setEndpointHTTPS(getAnonymousEndpoint(true));
       }
     } else if (isTestUser(getCustomerId())) {
       if (isHttpEnabled()) {
-        setEndpointHTTP(CONFLUENT_SUPPORT_METRICS_ENDPOINT_INSECURE_TEST_DEFAULT);
+        setEndpointHTTP(getTestEndpoint(false));
       }
       if (isHttpsEnabled()) {
-        setEndpointHTTPS(CONFLUENT_SUPPORT_METRICS_ENDPOINT_SECURE_TEST_DEFAULT);
+        setEndpointHTTPS(getTestEndpoint(true));
       }
     }
     else {
       if (isHttpEnabled()) {
-        setEndpointHTTP(CONFLUENT_SUPPORT_METRICS_ENDPOINT_INSECURE_CUSTOMER_DEFAULT);
+        setEndpointHTTP(getCustomerEndpoint(false));
       }
       if (isHttpsEnabled()) {
-        setEndpointHTTPS(CONFLUENT_SUPPORT_METRICS_ENDPOINT_SECURE_CUSTOMER_DEFAULT);
+        setEndpointHTTPS(getCustomerEndpoint(true));
       }
     }
 
   }
+
+  protected abstract String getAnonymousEndpoint(boolean secure) ;
+  protected abstract String getTestEndpoint(boolean secure) ;
+  protected abstract String getCustomerEndpoint(boolean secure) ;
 
   /**
    * A check on whether Proactive Support (PS) is enabled or not. PS is disabled when
@@ -301,7 +284,7 @@ public class BaseSupportConfig {
   public  void setEndpointHTTP(String endpointHTTP) {
 
      properties.setProperty(BaseSupportConfig.CONFLUENT_SUPPORT_METRICS_ENDPOINT_INSECURE_CONFIG,
-             String.format(endpointHTTP,component));
+         endpointHTTP);
   }
 
   public  boolean isHttpsEnabled() {
@@ -315,7 +298,7 @@ public class BaseSupportConfig {
 
   public  void setEndpointHTTPS(String endpointHTTPS) {
     properties.setProperty(BaseSupportConfig.CONFLUENT_SUPPORT_METRICS_ENDPOINT_SECURE_CONFIG,
-            String.format(endpointHTTPS,component));
+           endpointHTTPS);
   }
 
   public  String getProxy() {

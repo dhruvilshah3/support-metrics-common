@@ -134,7 +134,8 @@ public class WebClientProxyTest {
     byte[] anyData = "anyData".getBytes();
 
     // When/Then
-    int status = WebClient.send(CustomerIdExamples.validCustomerIds[0], anyData, p, proxy, httpclient);
+    int status = WebClient.send(CustomerIdExamples.validCustomerIds[0], anyData, p, proxy,
+        httpclient, null);
 
     assertThat(status == HttpStatus.SC_OK).isTrue();
     clientAndProxy.verify(request().withMethod("POST").withPath("/test"), exactly(1));

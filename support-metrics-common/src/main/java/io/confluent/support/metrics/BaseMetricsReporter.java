@@ -14,20 +14,21 @@
 package io.confluent.support.metrics;
 
 import org.apache.avro.generic.GenericContainer;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.Objects;
 
 import io.confluent.support.metrics.common.Collector;
 import io.confluent.support.metrics.common.kafka.KafkaUtilities;
 import io.confluent.support.metrics.common.kafka.ZkUtilsProvider;
-import io.confluent.support.metrics.common.time.TimeUtils;
 import io.confluent.support.metrics.serde.AvroSerializer;
 import io.confluent.support.metrics.submitters.ConfluentSubmitter;
 import io.confluent.support.metrics.submitters.KafkaSubmitter;
+import io.confluent.support.metrics.submitters.ResponseHandler;
 import io.confluent.support.metrics.utils.Jitter;
-import kafka.utils.ZkUtils;
 
 /**
  * Periodically reports metrics collected from a Kafka broker.
@@ -65,6 +66,7 @@ public abstract class BaseMetricsReporter implements Runnable {
    */
   private static final long SETTLING_TIME_MS = 10 * 1000L;
 
+
   private String customerId;
   private long reportIntervalMs;
   private String supportTopic;
@@ -74,9 +76,10 @@ public abstract class BaseMetricsReporter implements Runnable {
   private final AvroSerializer encoder = new AvroSerializer();
   protected final KafkaUtilities kafkaUtilities;
   protected final BaseSupportConfig supportConfig;
+  private final ResponseHandler responseHandler;
 
   public BaseMetricsReporter(BaseSupportConfig serverConfiguration) {
-    this(serverConfiguration,  new KafkaUtilities());
+    this(serverConfiguration,  new KafkaUtilities(), null);
   }
 
   /**
@@ -85,16 +88,22 @@ public abstract class BaseMetricsReporter implements Runnable {
    *                            hence server->KafkaConfig() does not contain any of them, necessitating
    *                            passing this extra argument to the API.
    * @param kafkaUtilities      An instance of {@link KafkaUtilities} that will be used to perform
-   *                            e.g. Kafka topic management if needed.
+   * @param responseHandler
    */
-  public BaseMetricsReporter(BaseSupportConfig supportConfig, KafkaUtilities kafkaUtilities) {
+  public BaseMetricsReporter(
+      BaseSupportConfig supportConfig,
+      KafkaUtilities kafkaUtilities,
+      ResponseHandler responseHandler
+  ) {
 
 
-    if (supportConfig == null || kafkaUtilities == null) {
-      throw new IllegalArgumentException("some arguments are null");
+    Objects.requireNonNull(supportConfig, "supportConfig can't be null");
+    if (StringUtils.isNotBlank(supportConfig.getKafkaTopic())) {
+      Objects.requireNonNull(kafkaUtilities, "kafkaUtilities can't be null");
     }
     this.kafkaUtilities = kafkaUtilities;
     this.supportConfig = supportConfig;
+    this.responseHandler = responseHandler;
   }
 
   public void init() {
@@ -115,14 +124,17 @@ public abstract class BaseMetricsReporter implements Runnable {
     String endpointHTTPS = supportConfig.getEndpointHTTPS();
     String proxyURI = supportConfig.getProxy();
 
+
     if (!endpointHTTP.isEmpty() || !endpointHTTPS.isEmpty()) {
-      confluentSubmitter = new ConfluentSubmitter(customerId, endpointHTTP, endpointHTTPS, proxyURI);
+      confluentSubmitter = new ConfluentSubmitter(customerId, endpointHTTP, endpointHTTPS,
+          proxyURI, responseHandler
+      );
     } else {
       confluentSubmitter = null;
     }
 
     if (!reportingEnabled()) {
-      log.info("Metrics collection disabled by broker configuration");
+      log.info("Metrics collection disabled by component configuration");
     }
   }
 
@@ -150,20 +162,23 @@ public abstract class BaseMetricsReporter implements Runnable {
         if (terminateEarly) {
           log.info("Metrics collection stopped before it even started");
         } else {
-          log.info("Starting metrics collection from monitored broker...");
+          log.info("Starting metrics collection from monitored component...");
           while (!Thread.currentThread().isInterrupted()) {
-            Thread.sleep(Jitter.addOnePercentJitter(reportIntervalMs));
             submitMetrics();
+            Thread.sleep(Jitter.addOnePercentJitter(reportIntervalMs));
+
           }
         }
       }
     } catch (InterruptedException i) {
       metricsCollector.setRuntimeState(Collector.RuntimeState.ShuttingDown);
       submitMetrics();
-      log.info("Graceful terminating metrics collection because the monitored broker is shutting down...");
+      log.info("Graceful terminating metrics collection because the monitored component is "
+               + "shutting down...");
       Thread.currentThread().interrupt();
     } catch (Exception e) {
-      log.error("Terminating metrics collection from monitored broker because: {}", e.getMessage());
+      log.error("Terminating metrics collection from monitored component because: {}",
+          e.getMessage());
     } finally {
       log.info("Metrics collection stopped");
     }

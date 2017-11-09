@@ -32,7 +32,7 @@ public class WebClientTest {
     byte[] nullData = null;
 
     // When
-    WebClient.send(customerId, nullData, p);
+    WebClient.send(customerId, nullData, p, null);
 
     // Then
     verifyZeroInteractions(p);
@@ -45,7 +45,7 @@ public class WebClientTest {
     byte[] emptyData = new byte[0];
 
     // When
-    WebClient.send(customerId, emptyData, p);
+    WebClient.send(customerId, emptyData, p, null);
 
     // Then
     verifyZeroInteractions(p);
@@ -59,7 +59,8 @@ public class WebClientTest {
 
     // When/Then
     for (String invalidCustomerId : CustomerIdExamples.invalidCustomerIds) {
-      assertThat(WebClient.send(invalidCustomerId, anyData, p)).isNotEqualTo(HttpStatus.SC_OK);
+      assertThat(WebClient.send(invalidCustomerId, anyData, p, null)).isNotEqualTo(HttpStatus
+          .SC_OK);
     }
   }
 
@@ -71,7 +72,8 @@ public class WebClientTest {
 
     // When/Then
     for (String invalidCustomerId : CustomerIdExamples.invalidAnonymousIds) {
-      assertThat(WebClient.send(invalidCustomerId, anyData, p)).isNotEqualTo(HttpStatus.SC_OK);
+      assertThat(WebClient.send(invalidCustomerId, anyData, p, null)).isNotEqualTo(HttpStatus
+          .SC_OK);
     }
   }
 
@@ -83,7 +85,7 @@ public class WebClientTest {
 
     // When/Then
     for (String validCustomerId : CustomerIdExamples.validCustomerIds) {
-      int status = WebClient.send(validCustomerId, anyData, p);
+      int status = WebClient.send(validCustomerId, anyData, p, null);
       // if we are not connected to the internet this test should still pass
       assertThat(status == HttpStatus.SC_OK || status == HttpStatus.SC_BAD_GATEWAY).isTrue();
     }
@@ -97,7 +99,7 @@ public class WebClientTest {
 
     // When/Then
     for (String validCustomerId : CustomerIdExamples.validAnonymousIds) {
-       int status = WebClient.send(validCustomerId, anyData, p);
+       int status = WebClient.send(validCustomerId, anyData, p, null);
       // if we are not connected to the internet this test should still pass
       assertThat(status == HttpStatus.SC_OK || status == HttpStatus.SC_BAD_GATEWAY).isTrue();
     }

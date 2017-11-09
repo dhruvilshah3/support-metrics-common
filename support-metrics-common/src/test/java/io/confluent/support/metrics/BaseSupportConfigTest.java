@@ -17,7 +17,6 @@ import com.google.common.collect.ObjectArrays;
 
 import org.junit.Test;
 
-
 import java.io.IOException;
 import java.util.Properties;
 
@@ -34,16 +33,23 @@ public class BaseSupportConfigTest {
   public void testValidCustomer() {
     for (String validId : CustomerIdExamples.validCustomerIds) {
       assertThat(validId + " is an invalid customer identifier",
-          BaseSupportConfig.isConfluentCustomer(validId), is(true));
+          BaseSupportConfig.isConfluentCustomer(validId), is(true)
+      );
     }
   }
 
   @Test
   public void testInvalidCustomer() {
-    String[] invalidIds = ObjectArrays.concat(CustomerIdExamples.invalidCustomerIds, CustomerIdExamples.validAnonymousIds, String.class);
+    String[]
+        invalidIds =
+        ObjectArrays.concat(CustomerIdExamples.invalidCustomerIds,
+            CustomerIdExamples.validAnonymousIds,
+            String.class
+        );
     for (String invalidCustomerId : invalidIds) {
       assertThat(invalidCustomerId + " is a valid customer identifier",
-          BaseSupportConfig.isConfluentCustomer(invalidCustomerId), is(false));
+          BaseSupportConfig.isConfluentCustomer(invalidCustomerId), is(false)
+      );
     }
   }
 
@@ -51,35 +57,55 @@ public class BaseSupportConfigTest {
   public void testValidAnonymousUser() {
     for (String validId : CustomerIdExamples.validAnonymousIds) {
       assertThat(validId + " is an invalid anonymous user identifier",
-          BaseSupportConfig.isAnonymousUser(validId), is(true));
+          BaseSupportConfig.isAnonymousUser(validId), is(true)
+      );
     }
   }
 
   @Test
   public void testInvalidAnonymousUser() {
-    String[] invalidIds = ObjectArrays.concat(CustomerIdExamples.invalidAnonymousIds, CustomerIdExamples.validCustomerIds, String.class);
+    String[]
+        invalidIds =
+        ObjectArrays.concat(CustomerIdExamples.invalidAnonymousIds,
+            CustomerIdExamples.validCustomerIds,
+            String.class
+        );
     for (String invalidId : invalidIds) {
       assertThat(invalidId + " is a valid anonymous user identifier",
-          BaseSupportConfig.isAnonymousUser(invalidId), is(false));
+          BaseSupportConfig.isAnonymousUser(invalidId), is(false)
+      );
     }
   }
 
   @Test
   public void testCustomerIdValidSettings() {
-    String[] validValues = ObjectArrays.concat(CustomerIdExamples.validAnonymousIds, CustomerIdExamples.validCustomerIds, String.class);
+    String[]
+        validValues =
+        ObjectArrays.concat(CustomerIdExamples.validAnonymousIds,
+            CustomerIdExamples.validCustomerIds,
+            String.class
+        );
     for (String validValue : validValues) {
       assertThat(validValue + " is an invalid value for " + BaseSupportConfig.CONFLUENT_SUPPORT_CUSTOMER_ID_CONFIG,
-          BaseSupportConfig.isSyntacticallyCorrectCustomerId(validValue), is(true));
+          BaseSupportConfig.isSyntacticallyCorrectCustomerId(validValue),
+          is(true)
+      );
     }
   }
 
   @Test
   public void testCustomerIdInvalidSettings() {
-    String[] invalidValues = ObjectArrays.concat(CustomerIdExamples.invalidAnonymousIds, CustomerIdExamples.invalidCustomerIds, String.class);
+    String[]
+        invalidValues =
+        ObjectArrays.concat(CustomerIdExamples.invalidAnonymousIds,
+            CustomerIdExamples.invalidCustomerIds,
+            String.class
+        );
     for (String invalidValue : invalidValues) {
       assertThat(invalidValue + " is a valid value for " + BaseSupportConfig
               .CONFLUENT_SUPPORT_CUSTOMER_ID_CONFIG,
-          BaseSupportConfig.isSyntacticallyCorrectCustomerId(invalidValue), is(false));
+          BaseSupportConfig.isSyntacticallyCorrectCustomerId(invalidValue), is(false)
+      );
     }
   }
 
@@ -101,7 +127,6 @@ public class BaseSupportConfigTest {
     Properties brokerConfiguration = new Properties();
     brokerConfiguration.load(BaseSupportConfigTest.class.getResourceAsStream("/default-server"
                                                                              + ".properties"));
-    brokerConfiguration.setProperty(BaseSupportConfig.CONFLUENT_SUPPORT_COMPONENT_CONFIG,"kafka");
     return brokerConfiguration;
   }
 
@@ -110,7 +135,7 @@ public class BaseSupportConfigTest {
     // Given
     Properties brokerConfiguration = defaultBrokerConfiguration();
 
-    BaseSupportConfig supportConfig = new BaseSupportConfig(brokerConfiguration);
+    BaseSupportConfig supportConfig = new TestSupportConfig(brokerConfiguration);
     // When/Then
     assertThat(supportConfig.getMetricsEnabled()).isEqualTo(true);
     assertThat(supportConfig.getCustomerId()).isEqualTo("c0");
@@ -119,27 +144,26 @@ public class BaseSupportConfigTest {
   }
 
 
-    @Test
+  @Test
   public void testGetDefaultProps() {
     // Given
     Properties overrideProps = new Properties();
-      overrideProps.setProperty(BaseSupportConfig.CONFLUENT_SUPPORT_COMPONENT_CONFIG,"kafka");
     // When
-      BaseSupportConfig supportConfig = new BaseSupportConfig(overrideProps);
+    BaseSupportConfig supportConfig = new TestSupportConfig(overrideProps);
 
     // Then
-      assertThat(supportConfig.getMetricsEnabled()).isEqualTo(false);
-      assertThat(supportConfig.getCustomerId()).isEqualTo("anonymous");
-      assertThat(supportConfig.getReportIntervalMs()).isEqualTo(24 * 60 * 60 * 1000);
-      assertThat(supportConfig.getKafkaTopic()).isEqualTo("__confluent.support.metrics");
-      assertThat(supportConfig.isHttpEnabled()).isEqualTo(true);
-      assertThat(supportConfig.isHttpsEnabled()).isEqualTo(true);
-      assertThat(supportConfig.isProactiveSupportEnabled()).isFalse();
-      assertThat(supportConfig.getProxy().equals(""));
-      assertThat(supportConfig.getEndpointHTTP()).isEqualTo("http://support-metrics.confluent"
-                                                            + ".io/kafka/anon");
-      assertThat(supportConfig.getEndpointHTTPS()).isEqualTo("https://support-metrics.confluent"
-                                                             + ".io/kafka/anon");
+    assertThat(supportConfig.getMetricsEnabled()).isEqualTo(true);
+    assertThat(supportConfig.getCustomerId()).isEqualTo("anonymous");
+    assertThat(supportConfig.getReportIntervalMs()).isEqualTo(24 * 60 * 60 * 1000);
+    assertThat(supportConfig.getKafkaTopic()).isEqualTo("__confluent.support.metrics");
+    assertThat(supportConfig.isHttpEnabled()).isEqualTo(true);
+    assertThat(supportConfig.isHttpsEnabled()).isEqualTo(true);
+    assertThat(supportConfig.isProactiveSupportEnabled()).isTrue();
+    assertThat(supportConfig.getProxy().equals(""));
+    assertThat(supportConfig.getEndpointHTTP()).isEqualTo("http://support-metrics.confluent"
+                                                          + ".io/anon");
+    assertThat(supportConfig.getEndpointHTTPS()).isEqualTo("https://support-metrics.confluent"
+                                                           + ".io/anon");
   }
 
   @Test
@@ -148,19 +172,20 @@ public class BaseSupportConfigTest {
     Properties overrideProps = new Properties();
     overrideProps.setProperty(
         BaseSupportConfig.CONFLUENT_SUPPORT_METRICS_ENDPOINT_INSECURE_CONFIG,
-        "anyValue");
+        "anyValue"
+    );
     overrideProps.setProperty(
         BaseSupportConfig.CONFLUENT_SUPPORT_METRICS_ENDPOINT_SECURE_CONFIG,
-        "anyValue");
-    overrideProps.setProperty(BaseSupportConfig.CONFLUENT_SUPPORT_COMPONENT_CONFIG,"kafka");
+        "anyValue"
+    );
     // When
-    BaseSupportConfig supportConfig = new BaseSupportConfig(overrideProps);
+    BaseSupportConfig supportConfig = new TestSupportConfig(overrideProps);
 
     // Then
     assertThat(supportConfig.getEndpointHTTP()).isEqualTo("http://support-metrics.confluent"
-                                                          + ".io/kafka/anon");
+                                                          + ".io/anon");
     assertThat(supportConfig.getEndpointHTTPS()).isEqualTo("https://support-metrics.confluent"
-                                                           + ".io/kafka/anon");
+                                                           + ".io/anon");
   }
 
   @Test
@@ -171,9 +196,8 @@ public class BaseSupportConfigTest {
         BaseSupportConfig.CONFLUENT_SUPPORT_METRICS_ENDPOINT_INSECURE_ENABLE_CONFIG, "false");
     overrideProps.setProperty(
         BaseSupportConfig.CONFLUENT_SUPPORT_METRICS_ENDPOINT_SECURE_ENABLE_CONFIG, "false");
-    overrideProps.setProperty(BaseSupportConfig.CONFLUENT_SUPPORT_COMPONENT_CONFIG,"kafka");
     // When
-    BaseSupportConfig supportConfig = new BaseSupportConfig(overrideProps);
+    BaseSupportConfig supportConfig = new TestSupportConfig(overrideProps);
 
     // Then
     assertThat(supportConfig.getEndpointHTTP()).isEmpty();
@@ -187,10 +211,10 @@ public class BaseSupportConfigTest {
     int reportIntervalHours = 1;
     overrideProps.setProperty(
         BaseSupportConfig.CONFLUENT_SUPPORT_METRICS_REPORT_INTERVAL_HOURS_CONFIG,
-        String.valueOf(reportIntervalHours));
-    overrideProps.setProperty(BaseSupportConfig.CONFLUENT_SUPPORT_COMPONENT_CONFIG,"kafka");
+        String.valueOf(reportIntervalHours)
+    );
     // When
-    BaseSupportConfig supportConfig = new BaseSupportConfig(overrideProps);
+    BaseSupportConfig supportConfig = new TestSupportConfig(overrideProps);
 
     // Then
     assertThat(supportConfig.getReportIntervalMs()).isEqualTo(reportIntervalHours * 60 * 60 * 1000);
@@ -202,10 +226,10 @@ public class BaseSupportConfigTest {
     Properties overrideProps = new Properties();
     overrideProps.setProperty(
         BaseSupportConfig.CONFLUENT_SUPPORT_METRICS_TOPIC_CONFIG,
-        "__another_example_topic");
-    overrideProps.setProperty(BaseSupportConfig.CONFLUENT_SUPPORT_COMPONENT_CONFIG,"kafka");
+        "__another_example_topic"
+    );
     // When
-    BaseSupportConfig supportConfig = new BaseSupportConfig(overrideProps);
+    BaseSupportConfig supportConfig = new TestSupportConfig(overrideProps);
 
     // Then
     assertThat(supportConfig.getKafkaTopic()).isEqualTo("__another_example_topic");
@@ -216,9 +240,8 @@ public class BaseSupportConfigTest {
     // Given
     Properties serverProperties = new Properties();
     serverProperties.setProperty(BaseSupportConfig.CONFLUENT_SUPPORT_METRICS_ENABLE_CONFIG, "true");
-    serverProperties.setProperty(BaseSupportConfig.CONFLUENT_SUPPORT_COMPONENT_CONFIG,"kafka");
 
-    BaseSupportConfig supportConfig = new BaseSupportConfig(serverProperties);
+    BaseSupportConfig supportConfig = new TestSupportConfig(serverProperties);
     // When/Then
     assertThat(supportConfig.isProactiveSupportEnabled()).isTrue();
   }
@@ -228,12 +251,19 @@ public class BaseSupportConfigTest {
     // Given
     Properties serverProperties = new Properties();
 
-    serverProperties.setProperty(BaseSupportConfig.CONFLUENT_SUPPORT_METRICS_ENABLE_CONFIG, "false");
-    serverProperties.setProperty(BaseSupportConfig.CONFLUENT_SUPPORT_METRICS_TOPIC_CONFIG, "anyTopic");
-    serverProperties.setProperty(BaseSupportConfig.CONFLUENT_SUPPORT_METRICS_ENDPOINT_INSECURE_ENABLE_CONFIG, "true");
-    serverProperties.setProperty(BaseSupportConfig.CONFLUENT_SUPPORT_METRICS_ENDPOINT_SECURE_ENABLE_CONFIG, "true");
-    serverProperties.setProperty(BaseSupportConfig.CONFLUENT_SUPPORT_COMPONENT_CONFIG,"kafka");
-    BaseSupportConfig supportConfig = new BaseSupportConfig(serverProperties);
+    serverProperties
+        .setProperty(BaseSupportConfig.CONFLUENT_SUPPORT_METRICS_ENABLE_CONFIG, "false");
+    serverProperties
+        .setProperty(BaseSupportConfig.CONFLUENT_SUPPORT_METRICS_TOPIC_CONFIG, "anyTopic");
+    serverProperties.setProperty(
+        BaseSupportConfig.CONFLUENT_SUPPORT_METRICS_ENDPOINT_INSECURE_ENABLE_CONFIG,
+        "true"
+    );
+    serverProperties.setProperty(
+        BaseSupportConfig.CONFLUENT_SUPPORT_METRICS_ENDPOINT_SECURE_ENABLE_CONFIG,
+        "true"
+    );
+    BaseSupportConfig supportConfig = new TestSupportConfig(serverProperties);
     // When/Then
     assertThat(supportConfig.isProactiveSupportEnabled()).isFalse();
   }
@@ -242,22 +272,24 @@ public class BaseSupportConfigTest {
   public void isProactiveSupportEnabledTopicOnly() {
     // Given
     Properties serverProperties = new Properties();
-    serverProperties.setProperty(BaseSupportConfig.CONFLUENT_SUPPORT_METRICS_TOPIC_CONFIG, "anyTopic");
-    serverProperties.setProperty(BaseSupportConfig.CONFLUENT_SUPPORT_COMPONENT_CONFIG,"kafka");
-    BaseSupportConfig supportConfig = new BaseSupportConfig(serverProperties);
+    serverProperties
+        .setProperty(BaseSupportConfig.CONFLUENT_SUPPORT_METRICS_TOPIC_CONFIG, "anyTopic");
+    BaseSupportConfig supportConfig = new TestSupportConfig(serverProperties);
     // When/Then
-    assertThat(supportConfig.isProactiveSupportEnabled()).isFalse();
+    assertThat(supportConfig.isProactiveSupportEnabled()).isTrue();
   }
 
   @Test
   public void isProactiveSupportEnabledHTTPOnly() {
     // Given
     Properties serverProperties = new Properties();
-    serverProperties.setProperty(BaseSupportConfig.CONFLUENT_SUPPORT_METRICS_ENDPOINT_INSECURE_ENABLE_CONFIG, "true");
-    serverProperties.setProperty(BaseSupportConfig.CONFLUENT_SUPPORT_COMPONENT_CONFIG,"kafka");
-    BaseSupportConfig supportConfig = new BaseSupportConfig(serverProperties);
+    serverProperties.setProperty(
+        BaseSupportConfig.CONFLUENT_SUPPORT_METRICS_ENDPOINT_INSECURE_ENABLE_CONFIG,
+        "true"
+    );
+    BaseSupportConfig supportConfig = new TestSupportConfig(serverProperties);
     // When/Then
-    assertThat(supportConfig.isProactiveSupportEnabled()).isFalse();
+    assertThat(supportConfig.isProactiveSupportEnabled()).isTrue();
   }
 
   @Test
@@ -266,20 +298,52 @@ public class BaseSupportConfigTest {
     Properties serverProperties = new Properties();
     serverProperties.setProperty(
         BaseSupportConfig.CONFLUENT_SUPPORT_METRICS_ENDPOINT_SECURE_ENABLE_CONFIG, "true");
-    serverProperties.setProperty(BaseSupportConfig.CONFLUENT_SUPPORT_COMPONENT_CONFIG,"kafka");
-    BaseSupportConfig supportConfig = new BaseSupportConfig(serverProperties);
+    BaseSupportConfig supportConfig = new TestSupportConfig(serverProperties);
     // When/Then
-    assertThat(supportConfig.isProactiveSupportEnabled()).isFalse();
+    assertThat(supportConfig.isProactiveSupportEnabled()).isTrue();
   }
 
   @Test
   public void proactiveSupportIsDisabledByDefaultWhenBrokerConfigurationIsEmpty() {
     // Given
     Properties serverProperties = new Properties();
-    serverProperties.setProperty(BaseSupportConfig.CONFLUENT_SUPPORT_COMPONENT_CONFIG,"kafka");
-    BaseSupportConfig supportConfig = new BaseSupportConfig(serverProperties);
+    BaseSupportConfig supportConfig = new TestSupportConfig(serverProperties);
     // When/Then
-    assertThat(supportConfig.isProactiveSupportEnabled()).isFalse();
+    assertThat(supportConfig.isProactiveSupportEnabled()).isTrue();
+  }
+
+  public class TestSupportConfig extends BaseSupportConfig {
+
+    public TestSupportConfig(Properties originals) {
+      super(originals);
+    }
+
+    @Override
+    protected String getAnonymousEndpoint(boolean secure) {
+      if (!secure) {
+        return "http://support-metrics.confluent.io/anon";
+      } else {
+        return "https://support-metrics.confluent.io/anon";
+      }
+    }
+
+    @Override
+    protected String getTestEndpoint(boolean secure) {
+      if (!secure) {
+        return "http://support-metrics.confluent.io/test";
+      } else {
+        return "https://support-metrics.confluent.io/test";
+      }
+    }
+
+    @Override
+    protected String getCustomerEndpoint(boolean secure) {
+      if (!secure) {
+        return "http://support-metrics.confluent.io/submit";
+      } else {
+        return "https://support-metrics.confluent.io/submit";
+      }
+    }
   }
 
 }

@@ -30,6 +30,8 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
+import io.confluent.support.metrics.submitters.ResponseHandler;
+
 public class WebClient {
   private static final Logger log = LoggerFactory.getLogger(WebClient.class);
   private static final int requestTimeoutMs = 2000;
@@ -44,9 +46,12 @@ public class WebClient {
    * @param proxy: a http (passive) proxy
    * @param httpClient : apache http client instance configured by caller
    * @return an HTTP Status code
-   * @see #send(String, byte[], HttpPost)
+   * @see #send(String, byte[], HttpPost, ResponseHandler)
    */
-  protected static int send(String customerId, byte[] bytes, HttpPost httpPost, HttpHost proxy, CloseableHttpClient httpClient) {
+  protected static int send(
+      String customerId, byte[] bytes, HttpPost httpPost, HttpHost proxy,
+      CloseableHttpClient httpClient, ResponseHandler responseHandler
+  ) {
     int statusCode = DEFAULT_STATUS_CODE;
     if (bytes != null && bytes.length > 0 && httpPost != null && customerId != null) {
 
@@ -81,6 +86,9 @@ public class WebClient {
         }
 
         response = httpClient.execute(httpPost);
+        if (responseHandler != null ){
+          responseHandler.handle(response);
+        }
 
         // send request
         log.debug("POST request returned {}", response.getStatusLine().toString());
@@ -116,8 +124,14 @@ public class WebClient {
    * @param proxy: a http (passive) proxy
    * @return an HTTP Status code
    */
-  public static int send(String customerId, byte[] bytes, HttpPost httpPost, HttpHost proxy) {
-    return send(customerId, bytes, httpPost, proxy, null);
+  public static int send(
+      String customerId,
+      byte[] bytes,
+      HttpPost httpPost,
+      HttpHost proxy,
+      ResponseHandler responseHandler
+  ) {
+    return send(customerId, bytes, httpPost, proxy, null, responseHandler);
   }
 
   /**
@@ -127,8 +141,13 @@ public class WebClient {
    * @param httpPost: A POST request structure
    * @return an HTTP Status code
    */
-  public static int send(String customerId, byte[] bytes, HttpPost httpPost) {
-    return send(customerId, bytes, httpPost, null);
+  public static int send(
+      String customerId,
+      byte[] bytes,
+      HttpPost httpPost,
+      ResponseHandler responseHandler
+  ) {
+    return send(customerId, bytes, httpPost, null, responseHandler);
   }
 
 }

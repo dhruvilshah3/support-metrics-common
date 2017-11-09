@@ -185,11 +185,12 @@ public class ConfluentSubmitterTest {
     String proxyURI = null;
 
     // When/Then
-    ConfluentSubmitter submitter = new ConfluentSubmitter(customerId, httpEndpoint, httpsEndpoint, proxyURI);
+    ConfluentSubmitter submitter = new ConfluentSubmitter(customerId, httpEndpoint,
+        httpsEndpoint, proxyURI, null);
     assertThat(submitter.getProxy() == null);
 
     proxyURI = "https://proxy.example.com";
-    submitter = new ConfluentSubmitter(customerId, httpEndpoint, httpsEndpoint, proxyURI);
+    submitter = new ConfluentSubmitter(customerId, httpEndpoint, httpsEndpoint, proxyURI, null);
     assertThat(submitter.getProxy().equals(proxyURI));
   }
 }
