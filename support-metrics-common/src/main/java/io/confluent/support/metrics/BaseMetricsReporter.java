@@ -66,6 +66,7 @@ public abstract class BaseMetricsReporter implements Runnable {
    * before we begin metrics collection.
    */
   private static final long SETTLING_TIME_MS = 10 * 1000L;
+  private final boolean enableSettlingTime;
 
 
   private String customerId;
@@ -80,19 +81,22 @@ public abstract class BaseMetricsReporter implements Runnable {
   private final ResponseHandler responseHandler;
 
   public BaseMetricsReporter(BaseSupportConfig serverConfiguration) {
-    this(serverConfiguration, new KafkaUtilities(), null);
+    this(serverConfiguration,  new KafkaUtilities(), null, true);
   }
 
   /**
    * @param supportConfig The properties this server was created from, plus extra Proactive Support
    *     (PS) one Note that Kafka does not understand PS properties, hence server->KafkaConfig()
    *     does not contain any of them, necessitating passing this extra argument to the API.
-   * @param kafkaUtilities An instance of {@link KafkaUtilities} that will be used to perform
+   * @param kafkaUtilities      An instance of {@link KafkaUtilities} that will be used to perform
+   * @param responseHandler Http Response Handler
+   * @param enableSettlingTime Enable settling time before starting metrics
    */
   public BaseMetricsReporter(
       BaseSupportConfig supportConfig,
       KafkaUtilities kafkaUtilities,
-      ResponseHandler responseHandler
+      ResponseHandler responseHandler,
+      boolean enableSettlingTime
   ) {
 
     Objects.requireNonNull(supportConfig, "supportConfig can't be null");
@@ -102,6 +106,7 @@ public abstract class BaseMetricsReporter implements Runnable {
     this.kafkaUtilities = kafkaUtilities;
     this.supportConfig = supportConfig;
     this.responseHandler = responseHandler;
+    this.enableSettlingTime = enableSettlingTime;
   }
 
   public void init() {
@@ -124,7 +129,7 @@ public abstract class BaseMetricsReporter implements Runnable {
 
     if (!endpointHTTP.isEmpty() || !endpointHTTPS.isEmpty()) {
       confluentSubmitter = new ConfluentSubmitter(customerId, endpointHTTP, endpointHTTPS,
-                                                  proxyURI, responseHandler
+          proxyURI, responseHandler
       );
     } else {
       confluentSubmitter = null;
@@ -174,10 +179,8 @@ public abstract class BaseMetricsReporter implements Runnable {
                + "shutting down...");
       Thread.currentThread().interrupt();
     } catch (Exception e) {
-      log.error(
-          "Terminating metrics collection from monitored component because: {}",
-          e.getMessage()
-      );
+      log.error("Terminating metrics collection from monitored component because: {}",
+          e.getMessage());
     } finally {
       log.info("Metrics collection stopped");
     }
@@ -197,9 +200,13 @@ public abstract class BaseMetricsReporter implements Runnable {
     try {
       boolean keepWaitingForServerToStartup = true;
       while (keepWaitingForServerToStartup && !Thread.currentThread().isInterrupted()) {
-        long waitTimeMs = Jitter.addOnePercentJitter(SETTLING_TIME_MS);
-        log.info("Waiting {} ms for the monitored service to finish starting up...", waitTimeMs);
-        Thread.sleep(waitTimeMs);
+
+        if (enableSettlingTime) {
+          long waitTimeMs = Jitter.addOnePercentJitter(SETTLING_TIME_MS);
+          log.info("Waiting {} ms for the monitored service to finish starting up...", waitTimeMs);
+          Thread.sleep(waitTimeMs);
+        }
+
         if (isShuttingDown()) {
           keepWaitingForServerToStartup = false;
           terminateEarly = true;
@@ -239,7 +246,7 @@ public abstract class BaseMetricsReporter implements Runnable {
         // attempt to create the topic. If failures occur, try again in the next round, however
         // the current batch of metrics will be lost.
         if (kafkaUtilities.createAndVerifyTopic(zkUtilsProvider().zkUtils(), supportTopic,
-                                                SUPPORT_TOPIC_PARTITIONS,
+            SUPPORT_TOPIC_PARTITIONS,
                                                 SUPPORT_TOPIC_REPLICATION, RETENTION_MS
         )) {
           kafkaSubmitter.submit(encodedMetricsRecord);
