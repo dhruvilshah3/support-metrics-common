@@ -11,8 +11,8 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package io.confluent.support.metrics.utils;
 
+package io.confluent.support.metrics.utils;
 
 import org.apache.http.HttpHost;
 import org.apache.http.HttpStatus;
@@ -33,6 +33,7 @@ import java.io.IOException;
 import io.confluent.support.metrics.submitters.ResponseHandler;
 
 public class WebClient {
+
   private static final Logger log = LoggerFactory.getLogger(WebClient.class);
   private static final int requestTimeoutMs = 2000;
   public static final int DEFAULT_STATUS_CODE = HttpStatus.SC_BAD_GATEWAY;
@@ -40,6 +41,7 @@ public class WebClient {
   /**
    * Sends a POST request to a web server
    * This method requires a pre-configured http client instance
+   *
    * @param customerId: customer Id on behalf of which the request is sent
    * @param bytes: request payload
    * @param httpPost: A POST request structure
@@ -63,11 +65,11 @@ public class WebClient {
       httpPost.setEntity(builder.build());
 
       // set the HTTP config
-      RequestConfig config = RequestConfig.custom().
-          setConnectTimeout(requestTimeoutMs).
-          setConnectionRequestTimeout(requestTimeoutMs).
-          setSocketTimeout(requestTimeoutMs).
-          build();
+      RequestConfig config = RequestConfig.custom()
+          .setConnectTimeout(requestTimeoutMs)
+          .setConnectionRequestTimeout(requestTimeoutMs)
+          .setSocketTimeout(requestTimeoutMs)
+          .build();
 
       CloseableHttpResponse response = null;
 
@@ -77,16 +79,21 @@ public class WebClient {
           config = RequestConfig.copy(config).setProxy(proxy).build();
           httpPost.setConfig(config);
           DefaultProxyRoutePlanner routePlanner = new DefaultProxyRoutePlanner(proxy);
-          if (httpClient == null)
-            httpClient = HttpClientBuilder.create().setRoutePlanner(routePlanner).setDefaultRequestConfig(config).build();
-        }
-        else {
-          if (httpClient == null)
+          if (httpClient == null) {
+            httpClient = HttpClientBuilder
+                .create()
+                .setRoutePlanner(routePlanner)
+                .setDefaultRequestConfig(config)
+                .build();
+          }
+        } else {
+          if (httpClient == null) {
             httpClient = HttpClientBuilder.create().setDefaultRequestConfig(config).build();
+          }
         }
 
         response = httpClient.execute(httpPost);
-        if (responseHandler != null ){
+        if (responseHandler != null) {
           responseHandler.handle(response);
         }
 
@@ -95,8 +102,7 @@ public class WebClient {
         statusCode = response.getStatusLine().getStatusCode();
       } catch (IOException e) {
         log.error("Could not submit metrics to Confluent: {}", e.getMessage());
-      }
-      finally {
+      } finally {
         try {
           httpClient.close();
         } catch (IOException e) {
@@ -118,6 +124,7 @@ public class WebClient {
 
   /**
    * Sends a POST request to a web server via a HTTP proxy
+   *
    * @param customerId: customer Id on behalf of which the request is sent
    * @param bytes: request payload
    * @param httpPost: A POST request structure
@@ -136,6 +143,7 @@ public class WebClient {
 
   /**
    * Sends a POST request to a web server
+   *
    * @param customerId: customer Id on behalf of which the request is sent
    * @param bytes: request payload
    * @param httpPost: A POST request structure

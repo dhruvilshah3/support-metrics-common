@@ -11,6 +11,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package io.confluent.support.metrics.submitters;
 
 import org.apache.commons.lang3.StringUtils;
@@ -47,25 +48,34 @@ public class ConfluentSubmitter implements Submitter {
   /**
    * Class that decides how to send data to Confluent.
    *
-   * @param endpointHTTP:  HTTP endpoint for the Confluent support service. Can be null.
+   * @param endpointHTTP: HTTP endpoint for the Confluent support service. Can be null.
    * @param endpointHTTPS: HTTPS endpoint for the Confluent support service. Can be null.
    */
   public ConfluentSubmitter(String customerId, String endpointHTTP, String endpointHTTPS) {
     this(customerId, endpointHTTP, endpointHTTPS, null, null);
   }
 
-  public ConfluentSubmitter(String customerId, String endpointHTTP, String endpointHTTPS, String
-      proxyURIString, ResponseHandler responseHandler) {
+  static boolean isNullOrEmpty(String s) {
+    return s == null || s.isEmpty();
+  }
 
-    if ((endpointHTTP == null || endpointHTTP.isEmpty()) && (endpointHTTPS == null || endpointHTTPS.isEmpty())) {
+  public ConfluentSubmitter(
+      String customerId,
+      String endpointHTTP,
+      String endpointHTTPS,
+      String proxyURIString,
+      ResponseHandler responseHandler
+  ) {
+
+    if (isNullOrEmpty(endpointHTTP) && isNullOrEmpty(endpointHTTPS)) {
       throw new IllegalArgumentException("must specify endpoints");
     }
-    if (endpointHTTP != null && !endpointHTTP.isEmpty()) {
+    if (!isNullOrEmpty(endpointHTTP)) {
       if (!testEndpointValid(new String[]{"http"}, endpointHTTP)) {
         throw new IllegalArgumentException("invalid HTTP endpoint");
       }
     }
-    if (endpointHTTPS != null && !endpointHTTPS.isEmpty()) {
+    if (!isNullOrEmpty(endpointHTTPS)) {
       if (!testEndpointValid(new String[]{"https"}, endpointHTTPS)) {
         throw new IllegalArgumentException("invalid HTTPS endpoint");
       }
@@ -104,7 +114,9 @@ public class ConfluentSubmitter implements Submitter {
         statusCode = sendSecurely(bytes);
         if (!submittedSuccessfully(statusCode)) {
           if (isInsecureEndpointEnabled()) {
-            log.error("Failed to submit metrics via secure endpoint, falling back to insecure endpoint");
+            log.error(
+                "Failed to submit metrics via secure endpoint, falling back to insecure endpoint"
+            );
             submitToInsecureEndpoint(bytes);
           } else {
             log.error("Failed to submit metrics via secure endpoint -- giving up");

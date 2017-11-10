@@ -11,9 +11,9 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package io.confluent.support.metrics.common.kafka;
 
-import kafka.client.ClientUtils$;
 import org.apache.kafka.common.errors.TopicExistsException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,9 +23,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
+
 import kafka.admin.AdminOperationException;
 import kafka.admin.AdminUtils;
 import kafka.admin.RackAwareMode.Disabled$;
+import kafka.client.ClientUtils$;
 import kafka.cluster.Broker;
 import kafka.cluster.BrokerEndPoint;
 import kafka.common.BrokerEndPointNotAvailableException;
@@ -88,9 +90,9 @@ public class KafkaUtilities {
    * Gets a list of servers that are up in the cluster
    *
    * @param maxNumServers Maximum number of bootstrap servers that should be returned.  Note that
-   *                      less servers may be returned than the maximum.
+   *     less servers may be returned than the maximum.
    * @return A list of bootstrap servers, or an empty list if there are none or if there were
-   * errors.  Note that only servers with PLAINTEXT ports will be returned.
+   *     errors.  Note that only servers with PLAINTEXT ports will be returned.
    */
   public List<String> getBootstrapServers(ZkUtils zkUtils, int maxNumServers) {
     if (zkUtils == null) {
@@ -125,18 +127,20 @@ public class KafkaUtilities {
   /**
    * Creates a topic in Kafka, if it is not already there, and verifies that it is properly created
    *
-   * @param partitions  Desired number of partitions
+   * @param partitions Desired number of partitions
    * @param replication Desired number of replicas
    * @param retentionMs Desired retention time in milliseconds
    * @return True if topic was created and verified successfully. False if topic could not be
-   * created, or it is created but verification reveals that the number of replicas or partitions
-   * have dropped to unacceptable levels.
+   *     created, or it is created but verification reveals that the number of replicas or
+   *     partitions have dropped to unacceptable levels.
    */
-  public boolean createAndVerifyTopic(ZkUtils zkUtils,
-                                      String topic,
-                                      int partitions,
-                                      int replication,
-                                      long retentionMs) {
+  public boolean createAndVerifyTopic(
+      ZkUtils zkUtils,
+      String topic,
+      int partitions,
+      int replication,
+      long retentionMs
+  ) {
     if (zkUtils == null) {
       throw new IllegalArgumentException("zkUtils must not be null");
     }
@@ -156,25 +160,41 @@ public class KafkaUtilities {
     boolean topicCreated = true;
     try {
       if (AdminUtils.topicExists(zkUtils, topic)) {
-        return (verifySupportTopic(zkUtils, topic, partitions, replication) != VerifyTopicState.Inadequate);
+        return (
+            verifySupportTopic(zkUtils, topic, partitions, replication)
+            != VerifyTopicState.Inadequate
+          );
       }
       Seq<Broker> brokerList = zkUtils.getAllBrokersInCluster();
       int actualReplication = Math.min(replication, brokerList.size());
       if (actualReplication < replication) {
-        log.warn("The replication factor of topic {} will be set to {}, which is less than the " +
-                "desired replication factor of {} (reason: this cluster contains only {} brokers).  " +
-                "If you happen to add more brokers to this cluster, then it is important to increase " +
-                "the replication factor of the topic to eventually {} to ensure reliable and  durable " +
-                "metrics collection.",
-            topic, actualReplication, replication, brokerList.size(),
-            replication);
+        log.warn(
+            "The replication factor of topic {} will be set to {}, which is less than the "
+            + "desired replication factor of {} (reason: this cluster contains only {} brokers).  "
+            + "If you happen to add more brokers to this cluster, then it is important to increase "
+            + "the replication factor of the topic to eventually {} to ensure reliable and "
+            + "durable metrics collection.",
+            topic,
+            actualReplication,
+            replication,
+            brokerList.size(),
+            replication
+        );
       }
 
       Properties metricsTopicProps = new Properties();
       metricsTopicProps.put(LogConfig.RetentionMsProp(), String.valueOf(retentionMs));
       log.info("Attempting to create topic {} with {} replicas, assuming {} total brokers",
-          topic, actualReplication, brokerList.size());
-      AdminUtils.createTopic(zkUtils, topic, partitions, actualReplication, metricsTopicProps, Disabled$.MODULE$);
+               topic, actualReplication, brokerList.size()
+      );
+      AdminUtils.createTopic(
+          zkUtils,
+          topic,
+          partitions,
+          actualReplication,
+          metricsTopicProps,
+          Disabled$.MODULE$
+      );
     } catch (TopicExistsException te) {
       log.info("Topic {} already exists", topic);
       topicCreated = false;
@@ -193,15 +213,17 @@ public class KafkaUtilities {
   /**
    * Verifies that the Kafka topic exists and is healthy.
    *
-   * @param topic          Topic to be validated.
-   * @param expPartitions  Expected number of partitions
+   * @param topic Topic to be validated.
+   * @param expPartitions Expected number of partitions
    * @param expReplication Expected number of replicas
    * @return an enum describing the topic state
    */
-  public VerifyTopicState verifySupportTopic(ZkUtils zkUtils,
-                                             String topic,
-                                             int expPartitions,
-                                             int expReplication) {
+  public VerifyTopicState verifySupportTopic(
+      ZkUtils zkUtils,
+      String topic,
+      int expPartitions,
+      int expReplication
+  ) {
 
     if (zkUtils == null) {
       throw new IllegalArgumentException("zkUtils must not be null");
@@ -220,16 +242,22 @@ public class KafkaUtilities {
     try {
       Set<String> topics = new HashSet<>();
       topics.add(topic);
-      scala.Option<scala.collection.Map<Object, Seq<Object>>> partitionAssignmentOption =
-          zkUtils.getPartitionAssignmentForTopics(JavaConversions.asScalaSet(topics).
-              toSeq()).get(topic);
+      scala.Option<scala.collection.Map<Object, Seq<Object>>> partitionAssignmentOption = zkUtils
+          .getPartitionAssignmentForTopics(
+              JavaConversions
+                  .asScalaSet(topics)
+                  .toSeq()
+          ).get(topic);
       if (!partitionAssignmentOption.isEmpty()) {
         scala.collection.Map partitionAssignment = partitionAssignmentOption.get();
         int actualNumPartitions = partitionAssignment.size();
         if (actualNumPartitions != expPartitions) {
-          log.warn("The topic {} should have only {} partitions.  Having more " +
-                  "partitions should not hurt but it is only needed under special circumstances.",
-              topic, expPartitions);
+          log.warn(
+              "The topic {} should have only {} partitions.  Having more partitions should "
+              + "not hurt but it is only needed under special circumstances.",
+              topic,
+              expPartitions
+          );
           verifyTopicState = VerifyTopicState.Less;
         }
         int firstPartitionId = 0;
@@ -238,11 +266,16 @@ public class KafkaUtilities {
         if (!replicasOfFirstPartitionOption.isEmpty()) {
           int actualReplication = replicasOfFirstPartitionOption.get().size();
           if (actualReplication < expReplication) {
-            log.warn("The replication factor of topic {} is {}, which is less than " +
-                    "the desired replication factor of {}.  If you happen to add more brokers to this " +
-                    "cluster, then it is important to increase the replication factor of the topic to " +
-                    "eventually {} to ensure reliable and durable metrics collection.",
-                topic, actualReplication, expReplication, expReplication);
+            log.warn(
+                "The replication factor of topic {} is {}, which is less than "
+                + "the desired replication factor of {}.  If you happen to add more brokers to this"
+                + " cluster, then it is important to increase the replication factor of the "
+                + "topic to eventually {} to ensure reliable and durable metrics collection.",
+                topic,
+                actualReplication,
+                expReplication,
+                expReplication
+            );
             verifyTopicState = VerifyTopicState.Less;
           }
         } else {
@@ -267,8 +300,8 @@ public class KafkaUtilities {
   }
 
   public boolean isShuttingDown(KafkaServer server) {
-    return server.brokerState().currentState() == PendingControlledShutdown.state() ||
-        server.brokerState().currentState() == BrokerShuttingDown.state();
+    return server.brokerState().currentState() == PendingControlledShutdown.state()
+           || server.brokerState().currentState() == BrokerShuttingDown.state();
   }
 
 }
