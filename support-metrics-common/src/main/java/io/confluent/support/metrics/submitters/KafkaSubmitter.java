@@ -11,8 +11,8 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package io.confluent.support.metrics.submitters;
 
+package io.confluent.support.metrics.submitters;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.kafka.clients.producer.KafkaProducer;
@@ -32,7 +32,6 @@ import io.confluent.support.metrics.common.kafka.KafkaUtilities;
 import io.confluent.support.metrics.common.kafka.ZkUtilsProvider;
 import kafka.utils.ZkUtils;
 
-
 public class KafkaSubmitter implements Submitter {
 
   private static final Logger log = LoggerFactory.getLogger(KafkaSubmitter.class);
@@ -49,9 +48,7 @@ public class KafkaSubmitter implements Submitter {
   private static final int BOOTSTRAP_SERVERS = 3;
 
   /**
-   */
-  /**
-   * @param topic            The Kafka topic to which data is being sent.
+   * @param topic The Kafka topic to which data is being sent.
    */
   public KafkaSubmitter(ZkUtilsProvider zkUtilsProvider, String topic) {
     if (zkUtilsProvider == null) {
@@ -68,12 +65,10 @@ public class KafkaSubmitter implements Submitter {
   }
 
   /**
-   */
-  /**
    * Submits data to the configured Kafka topic.  Ignores null or empty inputs.
    *
    * @param bytes The (serialized) data to be sent.  The data is sent as the "value" of a Kafka
-   *              message.
+   *     message.
    */
   @Override
   public void submit(byte[] bytes) {
@@ -96,11 +91,17 @@ public class KafkaSubmitter implements Submitter {
         }
         log.info("Successfully submitted metrics to Kafka topic {}", topic);
       } catch (InterruptedException e) {
-        log.error("Failed to submit metrics to Kafka topic {} (canceled request): {}",
-            topic, e.toString());
+        log.error(
+            "Failed to submit metrics to Kafka topic {} (canceled request): {}",
+            topic,
+            e.toString()
+        );
       } catch (ExecutionException e) {
-        log.error("Failed to submit metrics to Kafka topic {} (due to exception): {}",
-            topic, e.toString());
+        log.error(
+            "Failed to submit metrics to Kafka topic {} (due to exception): {}",
+            topic,
+            e.toString()
+        );
       }
     } else {
       log.error("Could not submit metrics to Kafka (metrics data missing)");
@@ -112,15 +113,22 @@ public class KafkaSubmitter implements Submitter {
     if (zkUtils == null) {
       zkUtils = zkUtilsProvider.zkUtils();
     }
-    List<String> bootstrapServerList = new KafkaUtilities().getBootstrapServers(zkUtils, BOOTSTRAP_SERVERS);
+    List<String> bootstrapServerList = new KafkaUtilities().getBootstrapServers(
+        zkUtils,
+        BOOTSTRAP_SERVERS
+    );
     String[] bootstrapServers = bootstrapServerList.toArray(new String[bootstrapServerList.size()]);
     props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, StringUtils.join(bootstrapServers, ","));
     props.put(ProducerConfig.ACKS_CONFIG, Integer.toString(requiredNumAcks));
     props.put(ProducerConfig.MAX_BLOCK_MS_CONFIG, maxBlockMs);
-    props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG,
-        "org.apache.kafka.common.serialization.ByteArraySerializer");
-    props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG,
-        "org.apache.kafka.common.serialization.ByteArraySerializer");
+    props.put(
+        ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG,
+        "org.apache.kafka.common.serialization.ByteArraySerializer"
+    );
+    props.put(
+        ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG,
+        "org.apache.kafka.common.serialization.ByteArraySerializer"
+    );
     return new KafkaProducer<>(props);
   }
 
