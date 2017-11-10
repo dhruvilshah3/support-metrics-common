@@ -11,10 +11,9 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package io.confluent.support.metrics;
 
-
-import org.apache.commons.lang3.StringUtils;
 import org.apache.kafka.common.config.ConfigException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,66 +21,80 @@ import org.slf4j.LoggerFactory;
 import java.util.Properties;
 import java.util.regex.Pattern;
 
-
 /**
  * Configuration for the Confluent Support options.
  *
- * Note: These Confluent-specific settings are added to {@code config/server.properties} by
+ * <p>Note: These Confluent-specific settings are added to {@code config/server.properties} by
  * Confluent's <a href="https://github.com/confluentinc/kafka-packaging">kafka-packaging</a> via a
  * patch file.  If you need to make any changes (e.g. renaming settings, adding/removing settings),
  * then make sure to also update the patch file accordingly.
  */
 public abstract class BaseSupportConfig {
+
   private static final Logger log = LoggerFactory.getLogger(BaseSupportConfig.class);
 
   /**
    * <code>confluent.support.metrics.enable</code>
    */
-  public static final String CONFLUENT_SUPPORT_METRICS_ENABLE_CONFIG = "confluent.support.metrics.enable";
-  private static final String CONFLUENT_SUPPORT_METRICS_ENABLE_DOC = "False to disable metric collection, true otherwise.";
+  public static final String CONFLUENT_SUPPORT_METRICS_ENABLE_CONFIG =
+      "confluent.support.metrics.enable";
+  private static final String CONFLUENT_SUPPORT_METRICS_ENABLE_DOC =
+      "False to disable metric collection, true otherwise.";
   public static final String CONFLUENT_SUPPORT_METRICS_ENABLE_DEFAULT = "true";
 
   /**
    * <code>confluent.support.customer.id</code>
    */
   public static final String CONFLUENT_SUPPORT_CUSTOMER_ID_CONFIG = "confluent.support.customer.id";
-  private static final String CONFLUENT_SUPPORT_CUSTOMER_ID_DOC = "Customer ID assigned by Confluent";
+  private static final String CONFLUENT_SUPPORT_CUSTOMER_ID_DOC =
+      "Customer ID assigned by Confluent";
   public static final String CONFLUENT_SUPPORT_CUSTOMER_ID_DEFAULT = "anonymous";
   public static final String CONFLUENT_SUPPORT_TEST_ID_DEFAULT = "c0";
 
   /**
    * <code>confluent.support.metrics.report.interval.hours</code>
    */
-  public static final String CONFLUENT_SUPPORT_METRICS_REPORT_INTERVAL_HOURS_CONFIG = "confluent.support.metrics.report.interval.hours";
-  private static final String CONFLUENT_SUPPORT_METRICS_REPORT_INTERVAL_HOURS_DOC = "Frequency of reporting in hours, e.g., 24 would indicate every day ";
+  public static final String CONFLUENT_SUPPORT_METRICS_REPORT_INTERVAL_HOURS_CONFIG =
+      "confluent.support.metrics.report.interval.hours";
+  private static final String CONFLUENT_SUPPORT_METRICS_REPORT_INTERVAL_HOURS_DOC =
+      "Frequency of reporting in hours, e.g., 24 would indicate every day ";
   public static final String CONFLUENT_SUPPORT_METRICS_REPORT_INTERVAL_HOURS_DEFAULT = "24";
 
   /**
    * <code>confluent.support.metrics.topic</code>
    */
-  public static final String CONFLUENT_SUPPORT_METRICS_TOPIC_CONFIG = "confluent.support.metrics.topic";
-  private static final String CONFLUENT_SUPPORT_METRICS_TOPIC_DOC = "Internal topic used for metric collection. If missing, metrics will not be collected in a Kafka topic ";
-  public static final String CONFLUENT_SUPPORT_METRICS_TOPIC_DEFAULT = "__confluent.support.metrics";
+  public static final String CONFLUENT_SUPPORT_METRICS_TOPIC_CONFIG =
+      "confluent.support.metrics.topic";
+  private static final String CONFLUENT_SUPPORT_METRICS_TOPIC_DOC =
+      "Internal topic used for metric collection. If missing, metrics will not be collected in a "
+      + "Kafka topic ";
+  public static final String CONFLUENT_SUPPORT_METRICS_TOPIC_DEFAULT =
+      "__confluent.support.metrics";
 
   /**
    * <code>confluent.support.metrics.endpoint.insecure.enable</code>
    */
-  public static final String CONFLUENT_SUPPORT_METRICS_ENDPOINT_INSECURE_ENABLE_CONFIG = "confluent.support.metrics.endpoint.insecure.enable";
-  public static final String CONFLUENT_SUPPORT_METRICS_ENDPOINT_INSECURE_ENABLE_DOC = "False to disable reporting over HTTP, true otherwise";
+  public static final String CONFLUENT_SUPPORT_METRICS_ENDPOINT_INSECURE_ENABLE_CONFIG =
+      "confluent.support.metrics.endpoint.insecure.enable";
+  public static final String CONFLUENT_SUPPORT_METRICS_ENDPOINT_INSECURE_ENABLE_DOC =
+      "False to disable reporting over HTTP, true otherwise";
   public static final String CONFLUENT_SUPPORT_METRICS_ENDPOINT_INSECURE_ENABLE_DEFAULT = "true";
 
   /**
    * <code>confluent.support.metrics.endpoint.secure.enable</code>
    */
-  public static final String CONFLUENT_SUPPORT_METRICS_ENDPOINT_SECURE_ENABLE_CONFIG = "confluent.support.metrics.endpoint.secure.enable";
-  public static final String CONFLUENT_SUPPORT_METRICS_ENDPOINT_SECURE_ENABLE_DOC = "False to disable reporting over HTTPS, true otherwise";
+  public static final String CONFLUENT_SUPPORT_METRICS_ENDPOINT_SECURE_ENABLE_CONFIG =
+      "confluent.support.metrics.endpoint.secure.enable";
+  public static final String CONFLUENT_SUPPORT_METRICS_ENDPOINT_SECURE_ENABLE_DOC =
+      "False to disable reporting over HTTPS, true otherwise";
   public static final String CONFLUENT_SUPPORT_METRICS_ENDPOINT_SECURE_ENABLE_DEFAULT = "true";
 
   /**
    * <code>confluent.support.proxy</code>
    */
   public static final String CONFLUENT_SUPPORT_PROXY_CONFIG = "confluent.support.proxy";
-  public static final String CONFLUENT_SUPPORT_PROXY_DOC = "HTTP forward proxy used to support metrics to Confluent";
+  public static final String CONFLUENT_SUPPORT_PROXY_DOC =
+      "HTTP forward proxy used to support metrics to Confluent";
   public static final String CONFLUENT_SUPPORT_PROXY_DEFAULT = "";
 
 
@@ -89,9 +102,11 @@ public abstract class BaseSupportConfig {
    * Confluent endpoints. These are internal properties that cannot be set from a config file
    * but that are added to the original config file at startup time
    */
-  public static final String CONFLUENT_SUPPORT_METRICS_ENDPOINT_INSECURE_CONFIG = "confluent.support.metrics.endpoint.insecure";
+  public static final String CONFLUENT_SUPPORT_METRICS_ENDPOINT_INSECURE_CONFIG =
+      "confluent.support.metrics.endpoint.insecure";
 
-  public static final String CONFLUENT_SUPPORT_METRICS_ENDPOINT_SECURE_CONFIG = "confluent.support.metrics.endpoint.secure";
+  public static final String CONFLUENT_SUPPORT_METRICS_ENDPOINT_SECURE_CONFIG =
+      "confluent.support.metrics.endpoint.secure";
 
 
   private static final Pattern customerPattern = Pattern.compile("c\\d{1,30}");
@@ -105,16 +120,30 @@ public abstract class BaseSupportConfig {
 
   /**
    * Returns the default Proactive Support properties
-   * @return
    */
-  protected  Properties getDefaultProps() {
+  protected Properties getDefaultProps() {
     Properties props = new Properties();
-    props.setProperty(CONFLUENT_SUPPORT_METRICS_ENABLE_CONFIG, CONFLUENT_SUPPORT_METRICS_ENABLE_DEFAULT);
+    props.setProperty(
+        CONFLUENT_SUPPORT_METRICS_ENABLE_CONFIG,
+        CONFLUENT_SUPPORT_METRICS_ENABLE_DEFAULT
+    );
     props.setProperty(CONFLUENT_SUPPORT_CUSTOMER_ID_CONFIG, CONFLUENT_SUPPORT_CUSTOMER_ID_DEFAULT);
-    props.setProperty(CONFLUENT_SUPPORT_METRICS_REPORT_INTERVAL_HOURS_CONFIG, CONFLUENT_SUPPORT_METRICS_REPORT_INTERVAL_HOURS_DEFAULT);
-    props.setProperty(CONFLUENT_SUPPORT_METRICS_TOPIC_CONFIG, CONFLUENT_SUPPORT_METRICS_TOPIC_DEFAULT);
-    props.setProperty(CONFLUENT_SUPPORT_METRICS_ENDPOINT_INSECURE_ENABLE_CONFIG, CONFLUENT_SUPPORT_METRICS_ENDPOINT_INSECURE_ENABLE_DEFAULT);
-    props.setProperty(CONFLUENT_SUPPORT_METRICS_ENDPOINT_SECURE_ENABLE_CONFIG, CONFLUENT_SUPPORT_METRICS_ENDPOINT_SECURE_ENABLE_DEFAULT);
+    props.setProperty(
+        CONFLUENT_SUPPORT_METRICS_REPORT_INTERVAL_HOURS_CONFIG,
+        CONFLUENT_SUPPORT_METRICS_REPORT_INTERVAL_HOURS_DEFAULT
+    );
+    props.setProperty(
+        CONFLUENT_SUPPORT_METRICS_TOPIC_CONFIG,
+        CONFLUENT_SUPPORT_METRICS_TOPIC_DEFAULT
+    );
+    props.setProperty(
+        CONFLUENT_SUPPORT_METRICS_ENDPOINT_INSECURE_ENABLE_CONFIG,
+        CONFLUENT_SUPPORT_METRICS_ENDPOINT_INSECURE_ENABLE_DEFAULT
+    );
+    props.setProperty(
+        CONFLUENT_SUPPORT_METRICS_ENDPOINT_SECURE_ENABLE_CONFIG,
+        CONFLUENT_SUPPORT_METRICS_ENDPOINT_SECURE_ENABLE_DEFAULT
+    );
     props.setProperty(CONFLUENT_SUPPORT_PROXY_CONFIG, CONFLUENT_SUPPORT_PROXY_DEFAULT);
     return props;
   }
@@ -128,8 +157,8 @@ public abstract class BaseSupportConfig {
    * Takes default properties from getDefaultProps() and a set of override properties and
    * returns a merged properties object, where the defaults are overridden.
    * Sanitizes and validates the returned properties
+   *
    * @param overrides Parameters that override the default properties
-   * @return
    */
   private void mergeAndValidateWithDefaultProperties(Properties overrides) {
     Properties defaults = getDefaultProps();
@@ -164,8 +193,7 @@ public abstract class BaseSupportConfig {
       if (isHttpsEnabled()) {
         setEndpointHTTPS(getTestEndpoint(true));
       }
-    }
-    else {
+    } else {
       if (isHttpEnabled()) {
         setEndpointHTTP(getCustomerEndpoint(false));
       }
@@ -176,9 +204,11 @@ public abstract class BaseSupportConfig {
 
   }
 
-  protected abstract String getAnonymousEndpoint(boolean secure) ;
-  protected abstract String getTestEndpoint(boolean secure) ;
-  protected abstract String getCustomerEndpoint(boolean secure) ;
+  protected abstract String getAnonymousEndpoint(boolean secure);
+
+  protected abstract String getTestEndpoint(boolean secure);
+
+  protected abstract String getCustomerEndpoint(boolean secure);
 
   /**
    * A check on whether Proactive Support (PS) is enabled or not. PS is disabled when
@@ -186,19 +216,20 @@ public abstract class BaseSupportConfig {
    *
    * @return false if PS is not enabled, true if PS is enabled
    */
-  public  boolean isProactiveSupportEnabled() {
+  public boolean isProactiveSupportEnabled() {
     if (properties == null) {
       return false;
     }
-   return getMetricsEnabled();
+    return getMetricsEnabled();
   }
 
   /**
    * @param customerId The value of "confluent.support.customer.id".
    * @return True if the value matches the setting we use to denote anonymous users.
    */
-  public  static boolean isAnonymousUser(String customerId) {
-    return customerId != null && customerId.toLowerCase().equals(CONFLUENT_SUPPORT_CUSTOMER_ID_DEFAULT);
+  public static boolean isAnonymousUser(String customerId) {
+    return customerId != null && customerId.toLowerCase().equals(
+        CONFLUENT_SUPPORT_CUSTOMER_ID_DEFAULT);
   }
 
   /**
@@ -233,14 +264,21 @@ public abstract class BaseSupportConfig {
       id = fallbackId;
     }
     if (!isSyntacticallyCorrectCustomerId(id)) {
-      log.error("'{}' is not a valid Confluent customer ID -- falling back to id '{}'", id, fallbackId);
+      log.error(
+          "'{}' is not a valid Confluent customer ID -- falling back to id '{}'",
+          id,
+          fallbackId
+      );
       id = fallbackId;
     }
     return id;
   }
 
-  public  long getReportIntervalMs() {
-    String intervalString = properties.getProperty(BaseSupportConfig.CONFLUENT_SUPPORT_METRICS_REPORT_INTERVAL_HOURS_CONFIG);
+  public long getReportIntervalMs() {
+    String intervalString =
+        properties.getProperty(
+            BaseSupportConfig.CONFLUENT_SUPPORT_METRICS_REPORT_INTERVAL_HOURS_CONFIG
+        );
     if (intervalString == null || intervalString.isEmpty()) {
       intervalString = BaseSupportConfig.CONFLUENT_SUPPORT_METRICS_REPORT_INTERVAL_HOURS_DEFAULT;
     }
@@ -250,29 +288,35 @@ public abstract class BaseSupportConfig {
         throw new ConfigException(
             BaseSupportConfig.CONFLUENT_SUPPORT_METRICS_REPORT_INTERVAL_HOURS_CONFIG,
             intervalString,
-            "Interval must be >= 1");
+            "Interval must be >= 1"
+        );
       }
       return intervalHours * 60 * 60 * 1000;
     } catch (NumberFormatException e) {
       throw new ConfigException(
           BaseSupportConfig.CONFLUENT_SUPPORT_METRICS_REPORT_INTERVAL_HOURS_CONFIG,
           intervalString,
-          "Interval is not an integer number");
+          "Interval is not an integer number"
+      );
     }
   }
 
-  public  String getKafkaTopic() {
+  public String getKafkaTopic() {
     return properties.getProperty(BaseSupportConfig.CONFLUENT_SUPPORT_METRICS_TOPIC_CONFIG, "");
   }
 
-  public  boolean getMetricsEnabled() {
+  public boolean getMetricsEnabled() {
     String enableString = properties
         .getProperty(BaseSupportConfig.CONFLUENT_SUPPORT_METRICS_ENABLE_CONFIG, "false");
     return Boolean.parseBoolean(enableString);
   }
 
-  public  boolean isHttpEnabled() {
-    String enableHTTP =  properties.getProperty(BaseSupportConfig.CONFLUENT_SUPPORT_METRICS_ENDPOINT_INSECURE_ENABLE_CONFIG, BaseSupportConfig.CONFLUENT_SUPPORT_METRICS_ENDPOINT_INSECURE_ENABLE_DEFAULT);
+  public boolean isHttpEnabled() {
+    String enableHTTP =
+        properties.getProperty(
+            BaseSupportConfig.CONFLUENT_SUPPORT_METRICS_ENDPOINT_INSECURE_ENABLE_CONFIG,
+            BaseSupportConfig.CONFLUENT_SUPPORT_METRICS_ENDPOINT_INSECURE_ENABLE_DEFAULT
+        );
     return Boolean.parseBoolean(enableHTTP);
   }
 
@@ -281,27 +325,41 @@ public abstract class BaseSupportConfig {
         .getProperty(BaseSupportConfig.CONFLUENT_SUPPORT_METRICS_ENDPOINT_INSECURE_CONFIG, "");
   }
 
-  public  void setEndpointHTTP(String endpointHTTP) {
+  public void setEndpointHTTP(String endpointHTTP) {
 
-     properties.setProperty(BaseSupportConfig.CONFLUENT_SUPPORT_METRICS_ENDPOINT_INSECURE_CONFIG,
-         endpointHTTP);
+    properties.setProperty(
+        BaseSupportConfig.CONFLUENT_SUPPORT_METRICS_ENDPOINT_INSECURE_CONFIG,
+        endpointHTTP
+    );
   }
 
-  public  boolean isHttpsEnabled() {
-    String enableHTTPS =  properties.getProperty(BaseSupportConfig.CONFLUENT_SUPPORT_METRICS_ENDPOINT_SECURE_ENABLE_CONFIG, BaseSupportConfig.CONFLUENT_SUPPORT_METRICS_ENDPOINT_SECURE_ENABLE_DEFAULT);
+  public boolean isHttpsEnabled() {
+    String enableHTTPS =
+        properties.getProperty(
+            BaseSupportConfig.CONFLUENT_SUPPORT_METRICS_ENDPOINT_SECURE_ENABLE_CONFIG,
+            BaseSupportConfig.CONFLUENT_SUPPORT_METRICS_ENDPOINT_SECURE_ENABLE_DEFAULT
+        );
     return Boolean.parseBoolean(enableHTTPS);
   }
 
-  public  String getEndpointHTTPS() {
-    return properties.getProperty(BaseSupportConfig.CONFLUENT_SUPPORT_METRICS_ENDPOINT_SECURE_CONFIG, "");
+  public String getEndpointHTTPS() {
+    return properties.getProperty(
+        BaseSupportConfig.CONFLUENT_SUPPORT_METRICS_ENDPOINT_SECURE_CONFIG,
+        ""
+    );
   }
 
-  public  void setEndpointHTTPS(String endpointHTTPS) {
-    properties.setProperty(BaseSupportConfig.CONFLUENT_SUPPORT_METRICS_ENDPOINT_SECURE_CONFIG,
-           endpointHTTPS);
+  public void setEndpointHTTPS(String endpointHTTPS) {
+    properties.setProperty(
+        BaseSupportConfig.CONFLUENT_SUPPORT_METRICS_ENDPOINT_SECURE_CONFIG,
+        endpointHTTPS
+    );
   }
 
-  public  String getProxy() {
-    return properties.getProperty(BaseSupportConfig.CONFLUENT_SUPPORT_PROXY_CONFIG, BaseSupportConfig.CONFLUENT_SUPPORT_PROXY_DEFAULT);
+  public String getProxy() {
+    return properties.getProperty(
+        BaseSupportConfig.CONFLUENT_SUPPORT_PROXY_CONFIG,
+        BaseSupportConfig.CONFLUENT_SUPPORT_PROXY_DEFAULT
+    );
   }
 }

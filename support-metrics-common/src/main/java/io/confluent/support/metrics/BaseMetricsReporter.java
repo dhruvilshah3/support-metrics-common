@@ -11,6 +11,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package io.confluent.support.metrics;
 
 import org.apache.avro.generic.GenericContainer;
@@ -33,10 +34,10 @@ import io.confluent.support.metrics.utils.Jitter;
 /**
  * Periodically reports metrics collected from a Kafka broker.
  *
- * Metrics are being reported to a Kafka topic within the same cluster and/or to Confluent via the
- * Internet.
+ * <p>Metrics are being reported to a Kafka topic within the same cluster and/or to Confluent via
+ * the Internet.
  *
- * This class is not thread-safe.
+ * <p>This class is not thread-safe.
  */
 public abstract class BaseMetricsReporter implements Runnable {
 
@@ -79,23 +80,20 @@ public abstract class BaseMetricsReporter implements Runnable {
   private final ResponseHandler responseHandler;
 
   public BaseMetricsReporter(BaseSupportConfig serverConfiguration) {
-    this(serverConfiguration,  new KafkaUtilities(), null);
+    this(serverConfiguration, new KafkaUtilities(), null);
   }
 
   /**
-   * @param supportConfig The properties this server was created from, plus extra Proactive Support (PS) ones
-   *                            Note that Kafka does not understand PS properties,
-   *                            hence server->KafkaConfig() does not contain any of them, necessitating
-   *                            passing this extra argument to the API.
-   * @param kafkaUtilities      An instance of {@link KafkaUtilities} that will be used to perform
-   * @param responseHandler
+   * @param supportConfig The properties this server was created from, plus extra Proactive Support
+   *     (PS) one Note that Kafka does not understand PS properties, hence server->KafkaConfig()
+   *     does not contain any of them, necessitating passing this extra argument to the API.
+   * @param kafkaUtilities An instance of {@link KafkaUtilities} that will be used to perform
    */
   public BaseMetricsReporter(
       BaseSupportConfig supportConfig,
       KafkaUtilities kafkaUtilities,
       ResponseHandler responseHandler
   ) {
-
 
     Objects.requireNonNull(supportConfig, "supportConfig can't be null");
     if (StringUtils.isNotBlank(supportConfig.getKafkaTopic())) {
@@ -124,10 +122,9 @@ public abstract class BaseMetricsReporter implements Runnable {
     String endpointHTTPS = supportConfig.getEndpointHTTPS();
     String proxyURI = supportConfig.getProxy();
 
-
     if (!endpointHTTP.isEmpty() || !endpointHTTPS.isEmpty()) {
       confluentSubmitter = new ConfluentSubmitter(customerId, endpointHTTP, endpointHTTPS,
-          proxyURI, responseHandler
+                                                  proxyURI, responseHandler
       );
     } else {
       confluentSubmitter = null;
@@ -177,8 +174,10 @@ public abstract class BaseMetricsReporter implements Runnable {
                + "shutting down...");
       Thread.currentThread().interrupt();
     } catch (Exception e) {
-      log.error("Terminating metrics collection from monitored component because: {}",
-          e.getMessage());
+      log.error(
+          "Terminating metrics collection from monitored component because: {}",
+          e.getMessage()
+      );
     } finally {
       log.info("Metrics collection stopped");
     }
@@ -187,7 +186,7 @@ public abstract class BaseMetricsReporter implements Runnable {
   /**
    * Waits for the monitored service to fully start up.
    *
-   * This is a blocking call.  This method will return if and only if:
+   * <p>This is a blocking call.  This method will return if and only if:
    *
    * <ul> <li>The service has successfully started.  The return value will be false.</li> <li>The
    * server is shutting down.  The return value will be true.</li> <li>The current thread was
@@ -240,8 +239,9 @@ public abstract class BaseMetricsReporter implements Runnable {
         // attempt to create the topic. If failures occur, try again in the next round, however
         // the current batch of metrics will be lost.
         if (kafkaUtilities.createAndVerifyTopic(zkUtilsProvider().zkUtils(), supportTopic,
-            SUPPORT_TOPIC_PARTITIONS,
-            SUPPORT_TOPIC_REPLICATION, RETENTION_MS)) {
+                                                SUPPORT_TOPIC_PARTITIONS,
+                                                SUPPORT_TOPIC_REPLICATION, RETENTION_MS
+        )) {
           kafkaSubmitter.submit(encodedMetricsRecord);
         }
       }
