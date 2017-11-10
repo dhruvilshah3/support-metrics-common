@@ -11,7 +11,6 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package io.confluent.support.metrics;
 
 import org.apache.avro.generic.GenericContainer;
@@ -34,10 +33,10 @@ import io.confluent.support.metrics.utils.Jitter;
 /**
  * Periodically reports metrics collected from a Kafka broker.
  *
- * <p>Metrics are being reported to a Kafka topic within the same cluster and/or to Confluent via
- * the Internet.
+ * Metrics are being reported to a Kafka topic within the same cluster and/or to Confluent via the
+ * Internet.
  *
- * <p>This class is not thread-safe.
+ * This class is not thread-safe.
  */
 public abstract class BaseMetricsReporter implements Runnable {
 
@@ -99,6 +98,7 @@ public abstract class BaseMetricsReporter implements Runnable {
       boolean enableSettlingTime
   ) {
 
+
     Objects.requireNonNull(supportConfig, "supportConfig can't be null");
     if (StringUtils.isNotBlank(supportConfig.getKafkaTopic())) {
       Objects.requireNonNull(kafkaUtilities, "kafkaUtilities can't be null");
@@ -126,6 +126,7 @@ public abstract class BaseMetricsReporter implements Runnable {
     String endpointHTTP = supportConfig.getEndpointHTTP();
     String endpointHTTPS = supportConfig.getEndpointHTTPS();
     String proxyURI = supportConfig.getProxy();
+
 
     if (!endpointHTTP.isEmpty() || !endpointHTTPS.isEmpty()) {
       confluentSubmitter = new ConfluentSubmitter(customerId, endpointHTTP, endpointHTTPS,
@@ -189,7 +190,7 @@ public abstract class BaseMetricsReporter implements Runnable {
   /**
    * Waits for the monitored service to fully start up.
    *
-   * <p>This is a blocking call.  This method will return if and only if:
+   * This is a blocking call.  This method will return if and only if:
    *
    * <ul> <li>The service has successfully started.  The return value will be false.</li> <li>The
    * server is shutting down.  The return value will be true.</li> <li>The current thread was
@@ -247,8 +248,7 @@ public abstract class BaseMetricsReporter implements Runnable {
         // the current batch of metrics will be lost.
         if (kafkaUtilities.createAndVerifyTopic(zkUtilsProvider().zkUtils(), supportTopic,
             SUPPORT_TOPIC_PARTITIONS,
-                                                SUPPORT_TOPIC_REPLICATION, RETENTION_MS
-        )) {
+            SUPPORT_TOPIC_REPLICATION, RETENTION_MS)) {
           kafkaSubmitter.submit(encodedMetricsRecord);
         }
       }

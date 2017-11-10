@@ -13,7 +13,6 @@
  */
 
 package io.confluent.support.metrics.utils;
-
 import java.util.Random;
 
 public class Jitter {
@@ -22,14 +21,11 @@ public class Jitter {
 
   /**
    * Adds 1% to a value. If value is 0, returns 0. If value is negative, adds 1% of abs(value) to it
-   *
    * @param value: Number to add 1% to. Could be negative.
    * @return Value +1% of abs(value)
    */
   public static long addOnePercentJitter(long value) {
-    if (value == 0 || value < 100) {
-      return value;
-    }
+    if (value == 0 || value < 100) return value;
     return value + random.nextInt((int) Math.abs(value) / 100);
   }
 }
