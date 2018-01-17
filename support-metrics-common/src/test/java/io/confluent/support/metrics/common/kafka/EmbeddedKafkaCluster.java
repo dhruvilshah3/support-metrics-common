@@ -107,7 +107,8 @@ public class EmbeddedKafkaCluster {
           ENABLE_SASL_SSL,
           SASL_SSL_PORT,
           Option.<String>empty(),
-          LOG_DIR_COUNT);
+          LOG_DIR_COUNT,
+          false);
       KafkaServer broker = TestUtils.createServer(KafkaConfig.fromProps(props), Time.SYSTEM);
       brokersById.put(brokerId, broker);
     } else {
