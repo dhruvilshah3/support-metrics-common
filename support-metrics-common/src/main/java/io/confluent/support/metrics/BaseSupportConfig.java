@@ -33,6 +33,14 @@ public abstract class BaseSupportConfig {
 
   private static final Logger log = LoggerFactory.getLogger(BaseSupportConfig.class);
 
+  static final String CONFLUENT_PHONE_HOME_ENDPOINT_BASE_SECURE =
+      "https://phone-home.confluent.io";
+  static final String CONFLUENT_PHONE_HOME_ENDPOINT_BASE_INSECURE =
+      "http://phone-home.confluent.io";
+  static final String CONFLUENT_PHONE_HOME_ENDPOINT_SUFFIX_USER_ANON = "anon";
+  static final String CONFLUENT_PHONE_HOME_ENDPOINT_SUFFIX_USER_TEST = "test";
+  static final String CONFLUENT_PHONE_HOME_ENDPOINT_SUFFIX_USER_CUSTOMER = "submit";
+
   /**
    * <code>confluent.support.metrics.enable</code>
    */
@@ -149,8 +157,13 @@ public abstract class BaseSupportConfig {
   }
 
 
+  // TODO(apovzner) remove this after all derived classes use constructor with endpointPath
   public BaseSupportConfig(Properties originals) {
-    mergeAndValidateWithDefaultProperties(originals);
+    mergeAndValidateWithDefaultProperties(originals, null);
+  }
+
+  public BaseSupportConfig(Properties originals, String endpointPath) {
+    mergeAndValidateWithDefaultProperties(originals, endpointPath);
   }
 
   /**
@@ -160,7 +173,7 @@ public abstract class BaseSupportConfig {
    *
    * @param overrides Parameters that override the default properties
    */
-  private void mergeAndValidateWithDefaultProperties(Properties overrides) {
+  private void mergeAndValidateWithDefaultProperties(Properties overrides, String endpointPath) {
     Properties defaults = getDefaultProps();
     Properties props;
 
@@ -178,15 +191,33 @@ public abstract class BaseSupportConfig {
     props.remove(BaseSupportConfig.CONFLUENT_SUPPORT_METRICS_ENDPOINT_INSECURE_CONFIG);
     props.remove(BaseSupportConfig.CONFLUENT_SUPPORT_METRICS_ENDPOINT_SECURE_CONFIG);
 
-    // set the correct customer id/endpoint pair
-    if (isAnonymousUser(getCustomerId())) {
+    String customerId = getCustomerId();
+
+    // new way to set endpoint
+    if (endpointPath != null) {
+      // derived class provided URI
+      if (isHttpEnabled()) {
+        setEndpointHTTP(getEndpoint(false, customerId, endpointPath));
+      }
+      if (isHttpsEnabled()) {
+        setEndpointHTTPS(getEndpoint(true, customerId, endpointPath));
+      }
+    } else {
+      // TODO(apovzner) once all existing clients implement getURI, remove this code
+      // set the correct customer id/endpoint pair
+      setEndpointsOldWay(customerId);
+    }
+  }
+
+  private void setEndpointsOldWay(String customerId) {
+    if (isAnonymousUser(customerId)) {
       if (isHttpEnabled()) {
         setEndpointHTTP(getAnonymousEndpoint(false));
       }
       if (isHttpsEnabled()) {
         setEndpointHTTPS(getAnonymousEndpoint(true));
       }
-    } else if (isTestUser(getCustomerId())) {
+    } else if (isTestUser(customerId)) {
       if (isHttpEnabled()) {
         setEndpointHTTP(getTestEndpoint(false));
       }
@@ -201,14 +232,38 @@ public abstract class BaseSupportConfig {
         setEndpointHTTPS(getCustomerEndpoint(true));
       }
     }
-
   }
 
-  protected abstract String getAnonymousEndpoint(boolean secure);
+  // TODO(apovzner) remove this after all derived classes use constructor with endpointPath
+  protected String getAnonymousEndpoint(boolean secure) {
+    return null;
+  }
 
-  protected abstract String getTestEndpoint(boolean secure);
+  // TODO(apovzner) remove this after all derived classes use constructor with endpointPath
+  protected String getTestEndpoint(boolean secure) {
+    return null;
+  }
 
-  protected abstract String getCustomerEndpoint(boolean secure);
+  // TODO(apovzner) remove this after all derived classes use constructor with endpointPath
+  protected String getCustomerEndpoint(boolean secure) {
+    return null;
+  }
+
+  private String getEndpoint(boolean secure, String customerId, String endpointPath) {
+    String base = secure ? CONFLUENT_PHONE_HOME_ENDPOINT_BASE_SECURE
+                         : CONFLUENT_PHONE_HOME_ENDPOINT_BASE_INSECURE;
+    return String.join("/", base, endpointPath, getEndpointSuffix(customerId));
+  }
+
+  private String getEndpointSuffix(String customerId) {
+    if (isAnonymousUser(customerId)) {
+      return CONFLUENT_PHONE_HOME_ENDPOINT_SUFFIX_USER_ANON;
+    } else if (isTestUser(customerId)) {
+      return CONFLUENT_PHONE_HOME_ENDPOINT_SUFFIX_USER_TEST;
+    } else {
+      return CONFLUENT_PHONE_HOME_ENDPOINT_SUFFIX_USER_CUSTOMER;
+    }
+  }
 
   /**
    * A check on whether Proactive Support (PS) is enabled or not. PS is disabled when
@@ -257,8 +312,12 @@ public abstract class BaseSupportConfig {
   }
 
   public String getCustomerId() {
+    return getCustomerId(properties);
+  }
+
+  public static String getCustomerId(Properties props) {
     String fallbackId = BaseSupportConfig.CONFLUENT_SUPPORT_CUSTOMER_ID_DEFAULT;
-    String id = properties.getProperty(BaseSupportConfig.CONFLUENT_SUPPORT_CUSTOMER_ID_CONFIG);
+    String id = props.getProperty(BaseSupportConfig.CONFLUENT_SUPPORT_CUSTOMER_ID_CONFIG);
     if (id == null || id.isEmpty()) {
       log.error("No customer ID configured -- falling back to id '{}'", fallbackId);
       id = fallbackId;
