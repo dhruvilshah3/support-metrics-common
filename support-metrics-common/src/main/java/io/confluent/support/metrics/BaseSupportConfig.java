@@ -203,7 +203,7 @@ public abstract class BaseSupportConfig {
         setEndpointHTTPS(getEndpoint(true, customerId, endpointPath));
       }
     } else {
-      // TODO(apovzner) once all existing clients implement getURI, remove this code
+      // TODO(apovzner) once all existing clients provide endpointPath, remove this code
       // set the correct customer id/endpoint pair
       setEndpointsOldWay(customerId);
     }

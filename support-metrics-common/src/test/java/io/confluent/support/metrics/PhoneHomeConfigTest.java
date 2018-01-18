@@ -31,9 +31,9 @@ public class PhoneHomeConfigTest {
     BaseSupportConfig config = new PhoneHomeConfig(overrideProps, "TestComponent");
     assertEquals("", config.getKafkaTopic());
     assertEquals(BaseSupportConfig.CONFLUENT_SUPPORT_CUSTOMER_ID_DEFAULT, config.getCustomerId());
-    assertEquals("https://version-check.confluent.io/TestComponent/anon",
+    assertEquals("https://phone-home.confluent.io/TestComponent/anon",
                  config.getEndpointHTTPS());
-    assertEquals("http://version-check.confluent.io/TestComponent/anon",
+    assertEquals("http://phone-home.confluent.io/TestComponent/anon",
                  config.getEndpointHTTP());
   }
 
@@ -46,9 +46,9 @@ public class PhoneHomeConfigTest {
     BaseSupportConfig config = new PhoneHomeConfig(overrideProps, "TestComponent");
     assertEquals("", config.getKafkaTopic());
     assertEquals(BaseSupportConfig.CONFLUENT_SUPPORT_TEST_ID_DEFAULT, config.getCustomerId());
-    assertEquals("https://version-check.confluent.io/TestComponent/test",
+    assertEquals("https://phone-home.confluent.io/TestComponent/test",
                  config.getEndpointHTTPS());
-    assertEquals("http://version-check.confluent.io/TestComponent/test",
+    assertEquals("http://phone-home.confluent.io/TestComponent/test",
                  config.getEndpointHTTP());
   }
 
@@ -60,7 +60,7 @@ public class PhoneHomeConfigTest {
 
     BaseSupportConfig config = new PhoneHomeConfig(overrideProps, "TestComponent");
     assertEquals(BaseSupportConfig.CONFLUENT_SUPPORT_CUSTOMER_ID_DEFAULT, config.getCustomerId());
-    assertEquals("https://version-check.confluent.io/TestComponent/anon",
+    assertEquals("https://phone-home.confluent.io/TestComponent/anon",
                  config.getEndpointHTTPS());
     assertEquals("",
                  config.getEndpointHTTP());
