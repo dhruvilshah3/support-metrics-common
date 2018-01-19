@@ -22,6 +22,9 @@ import static org.junit.Assert.assertEquals;
 
 public class PhoneHomeConfigTest {
 
+  private static final String EXPECTED_SECURE_ENDPOINT = "https://version-check.confluent.io";
+  private static final String EXPECTED_INSECURE_ENDPOINT = "http://version-check.confluent.io";
+
   @Test
   public void testProductionEndpoints() {
     Properties overrideProps = new Properties();
@@ -31,9 +34,9 @@ public class PhoneHomeConfigTest {
     BaseSupportConfig config = new PhoneHomeConfig(overrideProps, "TestComponent");
     assertEquals("", config.getKafkaTopic());
     assertEquals(BaseSupportConfig.CONFLUENT_SUPPORT_CUSTOMER_ID_DEFAULT, config.getCustomerId());
-    assertEquals("https://phone-home.confluent.io/TestComponent/anon",
+    assertEquals(EXPECTED_SECURE_ENDPOINT + "/TestComponent/anon",
                  config.getEndpointHTTPS());
-    assertEquals("http://phone-home.confluent.io/TestComponent/anon",
+    assertEquals(EXPECTED_INSECURE_ENDPOINT + "/TestComponent/anon",
                  config.getEndpointHTTP());
   }
 
@@ -46,9 +49,9 @@ public class PhoneHomeConfigTest {
     BaseSupportConfig config = new PhoneHomeConfig(overrideProps, "TestComponent");
     assertEquals("", config.getKafkaTopic());
     assertEquals(BaseSupportConfig.CONFLUENT_SUPPORT_TEST_ID_DEFAULT, config.getCustomerId());
-    assertEquals("https://phone-home.confluent.io/TestComponent/test",
+    assertEquals(EXPECTED_SECURE_ENDPOINT + "/TestComponent/test",
                  config.getEndpointHTTPS());
-    assertEquals("http://phone-home.confluent.io/TestComponent/test",
+    assertEquals(EXPECTED_INSECURE_ENDPOINT + "/TestComponent/test",
                  config.getEndpointHTTP());
   }
 
@@ -60,7 +63,7 @@ public class PhoneHomeConfigTest {
 
     BaseSupportConfig config = new PhoneHomeConfig(overrideProps, "TestComponent");
     assertEquals(BaseSupportConfig.CONFLUENT_SUPPORT_CUSTOMER_ID_DEFAULT, config.getCustomerId());
-    assertEquals("https://phone-home.confluent.io/TestComponent/anon",
+    assertEquals(EXPECTED_SECURE_ENDPOINT + "/TestComponent/anon",
                  config.getEndpointHTTPS());
     assertEquals("",
                  config.getEndpointHTTP());

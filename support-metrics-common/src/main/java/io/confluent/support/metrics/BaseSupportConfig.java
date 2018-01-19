@@ -34,9 +34,9 @@ public abstract class BaseSupportConfig {
   private static final Logger log = LoggerFactory.getLogger(BaseSupportConfig.class);
 
   static final String CONFLUENT_PHONE_HOME_ENDPOINT_BASE_SECURE =
-      "https://phone-home.confluent.io";
+      "https://version-check.confluent.io";
   static final String CONFLUENT_PHONE_HOME_ENDPOINT_BASE_INSECURE =
-      "http://phone-home.confluent.io";
+      "http://version-check.confluent.io";
   static final String CONFLUENT_PHONE_HOME_ENDPOINT_SUFFIX_USER_ANON = "anon";
   static final String CONFLUENT_PHONE_HOME_ENDPOINT_SUFFIX_USER_TEST = "test";
   static final String CONFLUENT_PHONE_HOME_ENDPOINT_SUFFIX_USER_CUSTOMER = "submit";
