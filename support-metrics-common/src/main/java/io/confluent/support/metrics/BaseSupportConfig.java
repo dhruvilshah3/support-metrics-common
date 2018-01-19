@@ -252,7 +252,7 @@ public abstract class BaseSupportConfig {
   private String getEndpoint(boolean secure, String customerId, String endpointPath) {
     String base = secure ? CONFLUENT_PHONE_HOME_ENDPOINT_BASE_SECURE
                          : CONFLUENT_PHONE_HOME_ENDPOINT_BASE_INSECURE;
-    return String.join("/", base, endpointPath, getEndpointSuffix(customerId));
+    return base + "/" + endpointPath + "/" + getEndpointSuffix(customerId);
   }
 
   private String getEndpointSuffix(String customerId) {
