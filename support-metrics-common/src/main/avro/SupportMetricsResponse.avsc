@@ -1,0 +1,24 @@
+{
+  "namespace": "io.confluent.support.metrics.response",
+  "type": "record",
+  "name": "SupportMetricsResponse",
+  "doc": "Represents response from Phone-Home server.",
+  "fields": [
+    {
+      "name": "informationForUser",
+      "type": [
+        "null",
+        "string"
+      ],
+      "doc": "Short text with information to the user."
+    },
+    {
+      "name": "confluentPlatformVersion",
+      "type": [
+        "null",
+        "string"
+      ],
+      "doc": "The latest available version of the Confluent Platform."
+    }
+  ]
+}
