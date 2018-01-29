@@ -65,7 +65,7 @@ public class WebClient {
       builder.addBinaryBody("file", bytes, ContentType.DEFAULT_BINARY, "filename");
       httpPost.setEntity(builder.build());
       httpPost.addHeader("api-version", "phone-home-v1");
-      if (responseHandler instanceof ConfluentResponseHandler) {
+      if (responseHandler != null && responseHandler instanceof ConfluentResponseHandler) {
         ConfluentResponseHandler confluentHandler = (ConfluentResponseHandler) responseHandler;
         if (confluentHandler.getAcceptMediaType() != null) {
           httpPost.addHeader("Accept", confluentHandler.getAcceptMediaType());
