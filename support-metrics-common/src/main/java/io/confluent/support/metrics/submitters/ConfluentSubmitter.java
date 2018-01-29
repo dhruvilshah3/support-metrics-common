@@ -64,6 +64,17 @@ public class ConfluentSubmitter implements Submitter {
       String endpointHTTP,
       String endpointHTTPS,
       String proxyURIString,
+      ConfluentResponseHandler confluentResponseHandler
+  ) {
+    this(customerId, endpointHTTP, endpointHTTPS, proxyURIString,
+         (ResponseHandler) confluentResponseHandler);
+  }
+
+  public ConfluentSubmitter(
+      String customerId,
+      String endpointHTTP,
+      String endpointHTTPS,
+      String proxyURIString,
       ResponseHandler responseHandler
   ) {
 
