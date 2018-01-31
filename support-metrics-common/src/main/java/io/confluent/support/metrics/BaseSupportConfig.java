@@ -37,9 +37,9 @@ public abstract class BaseSupportConfig {
       "https://version-check.confluent.io";
   static final String CONFLUENT_PHONE_HOME_ENDPOINT_BASE_INSECURE =
       "http://version-check.confluent.io";
-  static final String CONFLUENT_PHONE_HOME_ENDPOINT_SUFFIX_USER_ANON = "anon";
-  static final String CONFLUENT_PHONE_HOME_ENDPOINT_SUFFIX_USER_TEST = "test";
-  static final String CONFLUENT_PHONE_HOME_ENDPOINT_SUFFIX_USER_CUSTOMER = "submit";
+  public static final String CONFLUENT_PHONE_HOME_ENDPOINT_SUFFIX_USER_ANON = "anon";
+  public static final String CONFLUENT_PHONE_HOME_ENDPOINT_SUFFIX_USER_TEST = "test";
+  public static final String CONFLUENT_PHONE_HOME_ENDPOINT_SUFFIX_USER_CUSTOMER = "submit";
 
   /**
    * <code>confluent.support.metrics.enable</code>
