@@ -24,8 +24,7 @@ public class ErrorResponse {
   private final String message;
 
   @JsonCreator
-  public ErrorResponse(
-      @JsonProperty("message") String message) {
+  public ErrorResponse(@JsonProperty("message") String message) {
     this.message = message;
   }
 

@@ -27,7 +27,8 @@ public class PhoneHomeResponse {
   @JsonCreator
   public PhoneHomeResponse(
       @JsonProperty("confluentPlatformVersion") String confluentPlatformVersion,
-      @JsonProperty("informationForUser") String informationForUser) {
+      @JsonProperty("informationForUser") String informationForUser
+  ) {
     this.confluentPlatformVersion = confluentPlatformVersion;
     this.informationForUser = informationForUser;
   }
