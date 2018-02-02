@@ -63,6 +63,7 @@ public class WebClient {
       builder.addTextBody("cid", customerId);
       builder.addBinaryBody("file", bytes, ContentType.DEFAULT_BINARY, "filename");
       httpPost.setEntity(builder.build());
+      httpPost.addHeader("api-version", "phone-home-v1");
 
       // set the HTTP config
       RequestConfig config = RequestConfig.custom()
