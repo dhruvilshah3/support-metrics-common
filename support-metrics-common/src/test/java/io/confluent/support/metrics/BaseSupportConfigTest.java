@@ -39,6 +39,15 @@ public class BaseSupportConfigTest {
   }
 
   @Test
+  public void testValidNewCustomer() {
+    for (String validId : CustomerIdExamples.validNewCustomerIds) {
+      assertThat(validId + " is an invalid new customer identifier",
+                 BaseSupportConfig.isConfluentCustomer(validId), is(true)
+      );
+    }
+  }
+
+  @Test
   public void testInvalidCustomer() {
     String[]
         invalidIds =

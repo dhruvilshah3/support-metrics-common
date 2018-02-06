@@ -118,6 +118,9 @@ public abstract class BaseSupportConfig {
 
 
   private static final Pattern customerPattern = Pattern.compile("c\\d{1,30}");
+  private static final Pattern newCustomerPattern = Pattern.compile(
+      "[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}"
+  );
 
   public Properties getProperties() {
     return properties;
@@ -300,7 +303,9 @@ public abstract class BaseSupportConfig {
    * @return True if the value matches the pattern of Confluent's internal customer ids.
    */
   public static boolean isConfluentCustomer(String customerId) {
-    return customerId != null && customerPattern.matcher(customerId.toLowerCase()).matches();
+    return customerId != null
+           && (customerPattern.matcher(customerId.toLowerCase()).matches()
+               || newCustomerPattern.matcher(customerId).matches());
   }
 
   /**
