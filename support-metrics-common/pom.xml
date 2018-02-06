@@ -53,13 +53,11 @@
       <groupId>org.apache.httpcomponents</groupId>
       <artifactId>httpclient</artifactId>
       <version>4.5.2</version>
-      <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.httpcomponents</groupId>
       <artifactId>httpmime</artifactId>
       <version>4.5.2</version>
-      <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>commons-validator</groupId>
@@ -158,6 +156,24 @@
           <forkCount>2C</forkCount>
           <reuseForks>false</reuseForks>
         </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.avro</groupId>
+        <artifactId>avro-maven-plugin</artifactId>
+        <version>${avro.version}</version>
+        <executions>
+          <execution>
+            <phase>generate-sources</phase>
+            <goals>
+              <goal>schema</goal>
+            </goals>
+            <configuration>
+              <sourceDirectory>${project.basedir}/src/main/avro/</sourceDirectory>
+              <testSourceDirectory>${project.basedir}/src/test/</testSourceDirectory>
+              <stringType>String</stringType>
+            </configuration>
+          </execution>
+        </executions>
       </plugin>
     </plugins>
   </build>
