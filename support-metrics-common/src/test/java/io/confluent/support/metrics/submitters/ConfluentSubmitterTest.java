@@ -14,6 +14,7 @@
 package io.confluent.support.metrics.submitters;
 
 
+import org.apache.http.HttpResponse;
 import org.junit.Test;
 
 
@@ -96,6 +97,47 @@ public class ConfluentSubmitterTest {
 
     // When/Then
     new ConfluentSubmitter(customerId, httpEndpoint, httpsEndpoint);
+  }
+
+  @Test
+  public void testValidArgumentsForPhoneHomeConstructorWithoutCustomerId() {
+    ConfluentSubmitter submitter = new ConfluentSubmitter("test-component", null);
+    assertThat(ConfluentSubmitter.isNullOrEmpty(submitter.getProxy()));
+    assertThat(submitter
+                   .getEndpointHTTP()
+                   .equals(BaseSupportConfig.getEndpoint(
+                       false,
+                       BaseSupportConfig.CONFLUENT_SUPPORT_CUSTOMER_ID_DEFAULT,
+                       "test-component"))
+    );
+    assertThat(submitter
+                   .getEndpointHTTPS()
+                   .equals(BaseSupportConfig.getEndpoint(
+                       true,
+                       BaseSupportConfig.CONFLUENT_SUPPORT_CUSTOMER_ID_DEFAULT,
+                       "test-component"))
+    );
+  }
+
+  @Test
+  public void testValidArgumentsForPhoneHomeConstructorWithCustomerId() {
+    final String customerId = BaseSupportConfig.CONFLUENT_SUPPORT_TEST_ID_DEFAULT;
+    final ResponseHandler responseHandler = new ResponseHandler() {
+      @Override
+      public void handle(HttpResponse response) {
+        //
+      }
+    };
+
+    ConfluentSubmitter submitter =
+        new ConfluentSubmitter(customerId, "test-component", responseHandler);
+    assertThat(ConfluentSubmitter.isNullOrEmpty(submitter.getProxy()));
+    assertThat(submitter.getEndpointHTTP()
+                   .equals(BaseSupportConfig.getEndpoint(false, customerId, "test-component"))
+    );
+    assertThat(submitter.getEndpointHTTPS()
+                   .equals(BaseSupportConfig.getEndpoint(true, customerId, "test-component"))
+    );
   }
 
   @Test

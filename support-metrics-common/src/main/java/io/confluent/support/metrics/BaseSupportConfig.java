@@ -249,13 +249,13 @@ public abstract class BaseSupportConfig {
     return null;
   }
 
-  private String getEndpoint(boolean secure, String customerId, String endpointPath) {
+  public static String getEndpoint(boolean secure, String customerId, String endpointPath) {
     String base = secure ? CONFLUENT_PHONE_HOME_ENDPOINT_BASE_SECURE
                          : CONFLUENT_PHONE_HOME_ENDPOINT_BASE_INSECURE;
     return base + "/" + endpointPath + "/" + getEndpointSuffix(customerId);
   }
 
-  private String getEndpointSuffix(String customerId) {
+  private static String getEndpointSuffix(String customerId) {
     if (isAnonymousUser(customerId)) {
       return CONFLUENT_PHONE_HOME_ENDPOINT_SUFFIX_USER_ANON;
     } else if (isTestUser(customerId)) {

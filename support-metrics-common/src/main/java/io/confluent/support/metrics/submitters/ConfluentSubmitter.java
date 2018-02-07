@@ -59,6 +59,37 @@ public class ConfluentSubmitter implements Submitter {
     return s == null || s.isEmpty();
   }
 
+  /**
+   * Constructor for phone-home clients which use ConfluentSubmitter directly instead of
+   * BaseMetricsReporter and, as a result, don't need PhoneHomeConfig.
+   * Sets customerId = "anonymous"
+   */
+  public ConfluentSubmitter(String componentId, ResponseHandler responseHandler) {
+    this(BaseSupportConfig.CONFLUENT_SUPPORT_CUSTOMER_ID_DEFAULT, componentId, responseHandler);
+  }
+
+  /**
+   * Also constructor for phone-home clients which use ConfluentSubmitter directly, but lets set
+   * customer ID.
+   * Common use-case is customerId = "anonymous" (BaseSupportConfig
+   * .CONFLUENT_SUPPORT_CUSTOMER_ID_DEFAULT) for production code, and "c0"
+   * (BaseSupportConfig.CONFLUENT_SUPPORT_TEST_ID_DEFAULT) for internal testing. E.g. if we don't
+   * want to include any internal testing data to aggregations and analysis we do on S3 data that
+   * the server stores.
+   * If customerID is "anonymous", then the endpoint path ends in "/anon", and if customerId is
+   * "c0", then the endpoint path ends in "/test". CustomerId is also included in the body of
+   * the phone-home ping.
+   */
+  public ConfluentSubmitter(
+      String customerId, String componentId, ResponseHandler responseHandler
+  ) {
+    this(customerId,
+         BaseSupportConfig.getEndpoint(false, customerId, componentId),
+         BaseSupportConfig.getEndpoint(true, customerId, componentId),
+         BaseSupportConfig.CONFLUENT_SUPPORT_PROXY_DEFAULT,
+         responseHandler);
+  }
+
   public ConfluentSubmitter(
       String customerId,
       String endpointHTTP,
@@ -151,6 +182,17 @@ public class ConfluentSubmitter implements Submitter {
 
   private boolean isInsecureEndpointEnabled() {
     return !endpointHTTP.isEmpty();
+  }
+
+  /**
+   * Getters for testing
+   */
+  String getEndpointHTTP() {
+    return endpointHTTP;
+  }
+
+  String getEndpointHTTPS() {
+    return endpointHTTPS;
   }
 
   private boolean submittedSuccessfully(int statusCode) {
