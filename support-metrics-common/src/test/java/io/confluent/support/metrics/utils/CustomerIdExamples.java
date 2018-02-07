@@ -22,34 +22,33 @@ public class CustomerIdExamples {
   };
 
   public static final String[] validNewCustomerIds = {
-      "Ca765292-ED42-11AE-BACD-00AA0057B223",
-      "4d36e96e-e345-31ce-bfc1-08003be19318",
-      "4d36E96e-e345-31cE-bfc1-08003bE19318",
-      "adccccbe-eaaa-ffcf-bfce-adaacbEbffff",
-      "40360960-0345-3100-0001-080030019318",
-      "ADCCCCBE-EAAA-FFCF-BFCE-ADAABBBFFFAA",
-      "ADccCCBE-EAAA-FfCF-BFCE-ADAAbbbFFFAA",
-      "00000000-0000-0000-0000-000000000000",
-      "00000000-0000-0000-0000-000000000001"
+      "5003001200D8cyJ",
+      "abbcaabcaaDwcyJ",
+      "abbcaabcaadwcyj",
+      "AGGQAAFLSSDWPYJ",
+      "123456789012345",
+      "123456789012345123",
+      "123456789012345avc",
+      "5003001200D8cyJaaa",
+      "5003001200D8cyJ123",
+      "abbcaabcaadwcyjsss",
+      "AGGQAAFLSSDWPYJTTT",
   };
 
   // These invalid customer ids should not include valid anonymous user IDs.
   public static final String[] invalidCustomerIds = {
       "0c000", "0000C", null, "", "c", "C", "Hello", "World", "1", "12", "123", "1234", "12345",
-      "00000000-0000-0000-0000-00000000000",
-      "0000000-0000-0000-0000-000000000000",
-      "00000000-000-0000-0000-000000000000",
-      "00000000-0000-000-0000-000000000000",
-      "00000000-0000-0000-000-000000000000",
-      "HDCCCCBE-EAAA-FFCF-BFCE-ADAABBBFFFAA",
-      "ADCCCCBE-EAAA-FFCF-BFCE-ADAABBBFFFA*",
-      "ADCCCCBE-EAAA-FFCF-BFCE-ADAABBBFFFA!",
-      "ADCCCCBE-EAAA-FFCF-BFCE-ADAABBBFFFA%",
-      "Ca765292-ED42-11AE-BKCD-00AA0057B223",
-      "Ca765292-ED42-11AE-BACD-00AA005IB223",
-      "Ca765292-ED42-11AE-BACD-00AA0057P223",
-      "Ca765292-ED42-11AE-BACD-00AA0057p223",
-      "xxxxxxxx-ED42-11AE-BACD-00AA0057B223"
+      "5003001200D8cy",
+      "abbcaabcaaDwcyJa",
+      "abbcaabcaadwc*j",
+      "AGGQAAFLSSD^PYJ",
+      "123456789$12345",
+      "12345678901234512",
+      "123456789012345avca",
+      "5003001200D8cyJaaa88",
+      "5003001200D8cyJ1@3",
+      "abbcaabcaadwcyj!ss",
+      "AGGQAAFLSSDWPYJ_TT",
   };
 
   public static final String[] validAnonymousIds = {"anonymous", "ANONYMOUS", "anonyMOUS"};

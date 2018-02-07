@@ -119,7 +119,7 @@ public abstract class BaseSupportConfig {
 
   private static final Pattern customerPattern = Pattern.compile("c\\d{1,30}");
   private static final Pattern newCustomerPattern = Pattern.compile(
-      "[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}"
+      "[a-zA-Z0-9]{15}|[a-zA-Z0-9]{18}"
   );
 
   public Properties getProperties() {
