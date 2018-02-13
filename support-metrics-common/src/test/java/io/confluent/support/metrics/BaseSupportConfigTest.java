@@ -40,7 +40,13 @@ public class BaseSupportConfigTest {
 
   @Test
   public void testValidNewCustomer() {
-    for (String validId : CustomerIdExamples.validNewCustomerIds) {
+    String[]
+        validNewCustomerIds =
+        ObjectArrays.concat(CustomerIdExamples.validCaseSensitiveNewCustomerIds,
+                            CustomerIdExamples.validCaseInsensitiveNewCustomerIds,
+                            String.class
+        );
+    for (String validId : validNewCustomerIds) {
       assertThat(validId + " is an invalid new customer identifier",
                  BaseSupportConfig.isConfluentCustomer(validId), is(true)
       );
@@ -99,6 +105,11 @@ public class BaseSupportConfigTest {
           BaseSupportConfig.isSyntacticallyCorrectCustomerId(validValue),
           is(true)
       );
+      // old customer Ids are all case-insensitive
+      assertThat(validValue + " is case-sensitive customer ID.",
+                 BaseSupportConfig.isCaseSensitiveCustomerId(validValue),
+                 is(false)
+      );
     }
   }
 
@@ -118,6 +129,25 @@ public class BaseSupportConfigTest {
     }
   }
 
+  @Test
+  public void testCaseInsensitiveNewCustomerIds() {
+    for (String validValue : CustomerIdExamples.validCaseInsensitiveNewCustomerIds) {
+      assertThat(validValue + " is case-sensitive customer ID.",
+                 BaseSupportConfig.isCaseSensitiveCustomerId(validValue),
+                 is(false)
+      );
+    }
+  }
+
+  @Test
+  public void testCaseSensitiveNewCustomerIds() {
+    for (String validValue : CustomerIdExamples.validCaseSensitiveNewCustomerIds) {
+      assertThat(validValue + " is case-insensitive customer ID.",
+                 BaseSupportConfig.isCaseSensitiveCustomerId(validValue),
+                 is(true)
+      );
+    }
+  }
 
   @Test
   public void proactiveSupportConfigIsValidKafkaConfig() throws IOException {

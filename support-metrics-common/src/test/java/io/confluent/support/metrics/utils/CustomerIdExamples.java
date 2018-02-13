@@ -21,18 +21,25 @@ public class CustomerIdExamples {
       "c00000", "c12345", "c99999", "c123456789", "c123456789012345678901234567890",
   };
 
-  public static final String[] validNewCustomerIds = {
+  public static final String[] validCaseSensitiveNewCustomerIds = {
       "5003001200D8cyJ",
       "abbcaabcaaDwcyJ",
       "abbcaabcaadwcyj",
+      "abbcaAbcAadwcyj",
       "AGGQAAFLSSDWPYJ",
+      "AGGQAAfLSSDWpYJ",
       "123456789012345",
+      "c23456789012345",
+      "C23456789012345"
+  };
+
+  public static final String[] validCaseInsensitiveNewCustomerIds = {
       "123456789012345123",
       "123456789012345avc",
       "5003001200D8cyJaaa",
       "5003001200D8cyJ123",
       "abbcaabcaadwcyjsss",
-      "AGGQAAFLSSDWPYJTTT",
+      "AGGQAAFLSSDWPYJTTT"
   };
 
   // These invalid customer ids should not include valid anonymous user IDs.

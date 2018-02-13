@@ -118,8 +118,11 @@ public abstract class BaseSupportConfig {
 
 
   private static final Pattern customerPattern = Pattern.compile("c\\d{1,30}");
-  private static final Pattern newCustomerPattern = Pattern.compile(
-      "[a-zA-Z0-9]{15}|[a-zA-Z0-9]{18}"
+  private static final Pattern newCustomerCaseSensitivePattern = Pattern.compile(
+      "[a-zA-Z0-9]{15}"
+  );
+  private static final Pattern newCustomerCaseInsensitivePattern = Pattern.compile(
+      "[a-zA-Z0-9]{18}"
   );
 
   public Properties getProperties() {
@@ -305,7 +308,8 @@ public abstract class BaseSupportConfig {
   public static boolean isConfluentCustomer(String customerId) {
     return customerId != null
            && (customerPattern.matcher(customerId.toLowerCase()).matches()
-               || newCustomerPattern.matcher(customerId).matches());
+               || newCustomerCaseInsensitivePattern.matcher(customerId).matches()
+               || newCustomerCaseSensitivePattern.matcher(customerId).matches());
   }
 
   /**
@@ -314,6 +318,17 @@ public abstract class BaseSupportConfig {
    */
   public static boolean isSyntacticallyCorrectCustomerId(String customerId) {
     return isAnonymousUser(customerId) || isConfluentCustomer(customerId);
+  }
+
+  /**
+   * The 15-character alpha-numeric customer IDs are case-sensitive, others are case-insensitive.
+   * The old-style customer ID "c\\d{1,30}" maybe look the same as a 15-character alpha-numeric ID,
+   * if its length is also 15 characters. In that case, this method will return true.
+   * @param customerId The value of "confluent.support.customer.id".
+   * @return true if customer Id is case sensitive
+   */
+  public static boolean isCaseSensitiveCustomerId(String customerId) {
+    return newCustomerCaseSensitivePattern.matcher(customerId).matches();
   }
 
   public String getCustomerId() {
