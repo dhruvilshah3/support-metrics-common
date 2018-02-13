@@ -55,10 +55,6 @@ public class ConfluentSubmitter implements Submitter {
     this(customerId, endpointHTTP, endpointHTTPS, null, null);
   }
 
-  static boolean isNullOrEmpty(String s) {
-    return s == null || s.isEmpty();
-  }
-
   /**
    * Constructor for phone-home clients which use ConfluentSubmitter directly instead of
    * BaseMetricsReporter and, as a result, don't need PhoneHomeConfig.
@@ -98,21 +94,21 @@ public class ConfluentSubmitter implements Submitter {
       ResponseHandler responseHandler
   ) {
 
-    if (isNullOrEmpty(endpointHTTP) && isNullOrEmpty(endpointHTTPS)) {
+    if (StringUtils.isEmpty(endpointHTTP) && StringUtils.isEmpty(endpointHTTPS)) {
       throw new IllegalArgumentException("must specify endpoints");
     }
-    if (!isNullOrEmpty(endpointHTTP)) {
+    if (StringUtils.isNotEmpty(endpointHTTP)) {
       if (!testEndpointValid(new String[]{"http"}, endpointHTTP)) {
-        throw new IllegalArgumentException("invalid HTTP endpoint");
+        throw new IllegalArgumentException("invalid HTTP endpoint " + endpointHTTP);
       }
     }
-    if (!isNullOrEmpty(endpointHTTPS)) {
+    if (StringUtils.isNotEmpty(endpointHTTPS)) {
       if (!testEndpointValid(new String[]{"https"}, endpointHTTPS)) {
-        throw new IllegalArgumentException("invalid HTTPS endpoint");
+        throw new IllegalArgumentException("invalid HTTPS endpoint " + endpointHTTPS);
       }
     }
     if (!BaseSupportConfig.isSyntacticallyCorrectCustomerId(customerId)) {
-      throw new IllegalArgumentException("invalid customer ID");
+      throw new IllegalArgumentException("invalid customer ID "  + customerId);
     }
     this.endpointHTTP = endpointHTTP;
     this.endpointHTTPS = endpointHTTPS;
@@ -126,12 +122,8 @@ public class ConfluentSubmitter implements Submitter {
   }
 
   private boolean testEndpointValid(String[] schemes, String endpoint) {
-    UrlValidator urlValidator = new UrlValidator(schemes);
-    if (urlValidator.isValid(endpoint)) {
-      return true;
-    } else {
-      return false;
-    }
+    UrlValidator urlValidator = new UrlValidator(schemes, UrlValidator.ALLOW_LOCAL_URLS);
+    return urlValidator.isValid(endpoint);
   }
 
   /**
@@ -140,17 +132,18 @@ public class ConfluentSubmitter implements Submitter {
   @Override
   public void submit(byte[] bytes) {
     if (bytes != null && bytes.length > 0) {
-      int statusCode = WebClient.DEFAULT_STATUS_CODE;
       if (isSecureEndpointEnabled()) {
-        statusCode = sendSecurely(bytes);
-        if (!submittedSuccessfully(statusCode)) {
+        if (!submittedSuccessfully(sendSecurely(bytes))) {
           if (isInsecureEndpointEnabled()) {
             log.error(
                 "Failed to submit metrics via secure endpoint, falling back to insecure endpoint"
             );
             submitToInsecureEndpoint(bytes);
           } else {
-            log.error("Failed to submit metrics via secure endpoint -- giving up");
+            log.error(
+                "Failed to submit metrics via secure endpoint={} -- giving up",
+                endpointHTTPS
+            );
           }
         } else {
           log.info("Successfully submitted metrics to Confluent via secure endpoint");
@@ -172,7 +165,10 @@ public class ConfluentSubmitter implements Submitter {
     if (submittedSuccessfully(statusCode)) {
       log.info("Successfully submitted metrics to Confluent via insecure endpoint");
     } else {
-      log.error("Failed to submit metrics to Confluent via insecure endpoint -- giving up");
+      log.error(
+          "Failed to submit metrics to Confluent via insecure endpoint={} -- giving up",
+          endpointHTTP
+      );
     }
   }
 
