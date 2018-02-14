@@ -14,9 +14,9 @@
 package io.confluent.support.metrics.submitters;
 
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpResponse;
 import org.junit.Test;
-
 
 import io.confluent.support.metrics.BaseSupportConfig;
 import io.confluent.support.metrics.utils.CustomerIdExamples;
@@ -102,7 +102,7 @@ public class ConfluentSubmitterTest {
   @Test
   public void testValidArgumentsForPhoneHomeConstructorWithoutCustomerId() {
     ConfluentSubmitter submitter = new ConfluentSubmitter("test-component", null);
-    assertThat(ConfluentSubmitter.isNullOrEmpty(submitter.getProxy()));
+    assertThat(StringUtils.isEmpty(submitter.getProxy()));
     assertThat(submitter
                    .getEndpointHTTP()
                    .equals(BaseSupportConfig.getEndpoint(
@@ -131,7 +131,7 @@ public class ConfluentSubmitterTest {
 
     ConfluentSubmitter submitter =
         new ConfluentSubmitter(customerId, "test-component", responseHandler);
-    assertThat(ConfluentSubmitter.isNullOrEmpty(submitter.getProxy()));
+    assertThat(StringUtils.isEmpty(submitter.getProxy()));
     assertThat(submitter.getEndpointHTTP()
                    .equals(BaseSupportConfig.getEndpoint(false, customerId, "test-component"))
     );
