@@ -225,7 +225,6 @@ public class KafkaUtilitiesTest {
     }
   }
 
-
   @Test
   public void verifySupportTopicThrowsIAEWhenZkUtilsIsNull() {
     // Given
@@ -384,6 +383,22 @@ public class KafkaUtilitiesTest {
 
     // Cleanup
     cluster.stopCluster();
+  }
+
+  @Test
+  public void leaderIsElectedAfterCreateTopicReturns() {
+    // Given
+    KafkaUtilities kUtil = new KafkaUtilities();
+    EmbeddedKafkaCluster cluster = new EmbeddedKafkaCluster();
+    int numBrokers = 3;
+    cluster.startCluster(numBrokers);
+    KafkaServer broker = cluster.getBroker(0);
+    ZkUtils zkUtils = broker.zkUtils();
+    int replication = numBrokers;
+
+    assertThat(kUtil.createAndVerifyTopic(zkUtils, anyTopic, anyPartitions, replication,
+                                          oneYearRetention)).isTrue();
+    assertThat(zkUtils.getLeaderForPartition(anyTopic, 0).isDefined()).isTrue();
   }
 
 }
