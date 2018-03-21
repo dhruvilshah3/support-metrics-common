@@ -305,7 +305,7 @@ public class KafkaUtilities {
     long now;
     while ((now = Time.SYSTEM.milliseconds()) < startMs + timeout) {
       scala.Option<Object> leaderOpt = zkUtils.getLeaderForPartition(topic, partition);
-      if (leaderOpt.isDefined()) {
+      if (leaderOpt.isDefined() && ((int) leaderOpt.get() >= 0)) {
         return;
       }
       Thread.sleep(Math.min(startMs + timeout - now, 100L));
