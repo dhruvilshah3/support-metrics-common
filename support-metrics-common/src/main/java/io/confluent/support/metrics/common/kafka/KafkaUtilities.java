@@ -126,7 +126,9 @@ public class KafkaUtilities {
   }
 
   /**
-   * Creates a topic in Kafka, if it is not already there, and verifies that it is properly created
+   * Creates a topic in Kafka, if it is not already there, and verifies that it is properly
+   * created. After the method returns (true), it guarantees that leaders are elected for every
+   * new topic partition, but does not guarantee that all metadata is propagated to all the brokers.
    *
    * @param partitions  Desired number of partitions
    * @param replication Desired number of replicas
@@ -178,7 +180,7 @@ public class KafkaUtilities {
       log.info("Attempting to create topic {} with {} replicas, assuming {} total brokers",
           topic, actualReplication, brokerList.size());
       AdminUtils.createTopic(zkUtils, topic, partitions, actualReplication, metricsTopicProps, Disabled$.MODULE$);
-      // wait until metadata is propagated to brokers
+      // wait until leader is elected for every topic partition we created
       for (int part = 0; part < partitions; ++part) {
         waitUntilLeaderIsElected(zkUtils, topic, part, 30000L);
       }
