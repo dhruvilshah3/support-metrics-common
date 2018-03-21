@@ -17,7 +17,10 @@ package io.confluent.support.metrics.common.kafka;
 import kafka.cluster.EndPoint;
 import kafka.zk.AdminZkClient;
 import kafka.zk.KafkaZkClient;
+
+import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.errors.TopicExistsException;
+import org.apache.kafka.common.utils.Time;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,6 +31,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Properties;
 import java.util.Set;
+import java.util.concurrent.TimeoutException;
 
 import kafka.admin.AdminOperationException;
 import kafka.admin.RackAwareMode.Disabled$;
@@ -120,9 +124,11 @@ public class KafkaUtilities {
   }
 
   /**
-   * Creates a topic in Kafka, if it is not already there, and verifies that it is properly created
+   * Creates a topic in Kafka, if it is not already there, and verifies that it is properly
+   * created. After the method returns (true), it guarantees that leaders are elected for every
+   * new topic partition, but does not guarantee that all metadata is propagated to all the brokers.
    *
-   * @param partitions Desired number of partitions
+   * @param partitions  Desired number of partitions
    * @param replication Desired number of replicas
    * @param retentionMs Desired retention time in milliseconds
    * @return True if topic was created and verified successfully. False if topic could not be
@@ -189,12 +195,23 @@ public class KafkaUtilities {
           metricsTopicProps,
           Disabled$.MODULE$
       );
+      // wait until leader is elected for every topic partition we created
+      for (int part = 0; part < partitions; ++part) {
+        waitUntilLeaderIsElected(zkClient, topic, part, 30000L);
+      }
     } catch (TopicExistsException te) {
       log.info("Topic {} already exists", topic);
       topicCreated = false;
     } catch (AdminOperationException e) {
       topicCreated = false;
       log.error("Could not create topic {}: {}", topic, e.getMessage());
+    } catch (TimeoutException toe) {
+      topicCreated = false;
+      log.error("Timed out waiting for leader to be elected after creating topic: {}",
+                toe.getMessage());
+    } catch (InterruptedException ie) {
+      topicCreated = false;
+      log.error("Interrupted the wait for leader to be elected after creating topic={}", topic);
     } catch (Exception e) {
       // there are several other Zookeeper exceptions possible deep in Zookeeper
       topicCreated = false;
@@ -291,6 +308,37 @@ public class KafkaUtilities {
   public boolean isShuttingDown(KafkaServer server) {
     return server.brokerState().currentState() == PendingControlledShutdown.state()
            || server.brokerState().currentState() == BrokerShuttingDown.state();
+  }
+
+
+  /**
+   * Wait until the leader of a partition is elected.
+   * @throws TimeoutException if the leader is unknown after timeout ms is passed.
+   * @throws InterruptedException if waiting for leader election was interrupted.
+   */
+  private void waitUntilLeaderIsElected(
+      KafkaZkClient zkClient, String topic, int partition, long timeout)
+      throws InterruptedException, TimeoutException {
+    if (zkClient == null) {
+      throw new IllegalArgumentException("zkClient must not be null");
+    }
+    if (topic == null || topic.isEmpty()) {
+      throw new IllegalArgumentException("topic must not be null or empty");
+    }
+
+    long startMs = Time.SYSTEM.milliseconds();
+    long now;
+    while ((now = Time.SYSTEM.milliseconds()) < startMs + timeout) {
+      scala.Option<Object> leaderOpt =
+          zkClient.getLeaderForPartition(new TopicPartition(topic, partition));
+      if (leaderOpt.isDefined() && ((int) leaderOpt.get() >= 0)) {
+        return;
+      }
+      Thread.sleep(Math.min(startMs + timeout - now, 100L));
+    }
+    throw new TimeoutException(
+        "Timing out after " + timeout
+        + "ms since a leader was not elected for topic=" + topic + " partition=" + partition);
   }
 
 }

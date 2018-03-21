@@ -14,6 +14,8 @@
 package io.confluent.support.metrics.common.kafka;
 
 import kafka.zk.KafkaZkClient;
+
+import org.apache.kafka.common.TopicPartition;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -225,7 +227,6 @@ public class KafkaUtilitiesTest {
     }
   }
 
-
   @Test
   public void verifySupportTopicThrowsIAEWhenKafkaZkClientIsNull() {
     // Given
@@ -387,6 +388,23 @@ public class KafkaUtilitiesTest {
 
     // Cleanup
     cluster.stopCluster();
+  }
+
+  @Test
+  public void leaderIsElectedAfterCreateTopicReturns() {
+    // Given
+    KafkaUtilities kUtil = new KafkaUtilities();
+    EmbeddedKafkaCluster cluster = new EmbeddedKafkaCluster();
+    int numBrokers = 3;
+    cluster.startCluster(numBrokers);
+    KafkaServer broker = cluster.getBroker(0);
+    KafkaZkClient zkClient = broker.zkClient();
+    int replication = numBrokers;
+
+    assertThat(kUtil.createAndVerifyTopic(zkClient, anyTopic, anyPartitions, replication,
+                                          oneYearRetention)).isTrue();
+    assertThat(zkClient.getLeaderForPartition(
+        new TopicPartition(anyTopic, 0)).isDefined()).isTrue();
   }
 
 }
