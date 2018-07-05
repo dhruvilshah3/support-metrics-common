@@ -339,7 +339,7 @@ public abstract class BaseSupportConfig {
     String fallbackId = BaseSupportConfig.CONFLUENT_SUPPORT_CUSTOMER_ID_DEFAULT;
     String id = props.getProperty(BaseSupportConfig.CONFLUENT_SUPPORT_CUSTOMER_ID_CONFIG);
     if (id == null || id.isEmpty()) {
-      log.error("No customer ID configured -- falling back to id '{}'", fallbackId);
+      log.info("No customer ID configured -- falling back to id '{}'", fallbackId);
       id = fallbackId;
     }
     if (!isSyntacticallyCorrectCustomerId(id)) {
