@@ -210,6 +210,7 @@ public class KafkaUtilities {
       log.error("Timed out waiting for leader to be elected after creating topic: {}",
                 toe.getMessage());
     } catch (InterruptedException ie) {
+      Thread.currentThread().interrupt();
       topicCreated = false;
       log.error("Interrupted the wait for leader to be elected after creating topic={}", topic);
     } catch (Exception e) {
