@@ -91,6 +91,7 @@ public class KafkaSubmitter implements Submitter {
         }
         log.info("Successfully submitted metrics to Kafka topic {}", topic);
       } catch (InterruptedException e) {
+        Thread.currentThread().interrupt();
         log.error(
             "Failed to submit metrics to Kafka topic {} (canceled request): {}",
             topic,
